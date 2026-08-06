@@ -1,0 +1,15 @@
+{
+  "name": "nodeseek-meow-monitor",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@xmldom/xmldom": "0.9.10"
+  }
+}
