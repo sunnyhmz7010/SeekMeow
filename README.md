@@ -33,7 +33,7 @@ docker run -d \
 | 变量 | 必填 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | `MEOW_NICKNAME` | 是 | - | MeoW 用户昵称，不允许包含 `/` |
-| `CHECK_INTERVAL_SECONDS` | 否 | `5` | 检查间隔，单位为秒，最小为 1 |
+| `CHECK_INTERVAL_SECONDS` | 否 | `5` | 检查间隔，单位为秒，范围为 1-2147483 |
 | `MATCH_SCOPE` | 否 | `all` | `title`、`summary` 或 `all`；`summary` 是 RSS 摘要，不是完整正文 |
 | `KEYWORDS` | 条件必填 | - | 英文逗号分隔，任意关键词命中即可 |
 | `KEYWORD_GROUPS` | 条件必填 | `[]` | JSON 二维数组，同组内所有词都命中才成立 |
@@ -56,7 +56,7 @@ docker run -d \
 docker logs -f nodeseek-meow-monitor
 ```
 
-同一容器执行 `docker restart` 时会保留去重状态；删除并重建容器后，按照 `PUSH_EXISTING` 重新执行首次扫描规则。
+同一容器执行 `docker restart` 时会保留去重状态和待重试消息；删除并重建容器后，按照 `PUSH_EXISTING` 重新执行首次扫描规则。
 
 ## 本地测试
 

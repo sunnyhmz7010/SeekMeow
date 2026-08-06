@@ -29,12 +29,28 @@ test('状态可持久化且只保留最近 ID', async (t) => {
   assert.equal(await state.load(), false);
   state.addMany(['1', '2', '3']);
   await state.save();
-  assert.deepEqual(JSON.parse(await readFile(file, 'utf8')), { processedIds: ['2', '3'] });
+  assert.deepEqual(JSON.parse(await readFile(file, 'utf8')), {
+    processedIds: ['2', '3'],
+    pendingItems: []
+  });
 
   const reloaded = new StateStore(file, 2);
   assert.equal(await reloaded.load(), true);
   assert.equal(reloaded.has('2'), true);
   assert.equal(reloaded.has('1'), false);
+});
+
+test('待重试帖子会随状态持久化', async (t) => {
+  const { file, state } = await tempState(t);
+  await state.load();
+  assert.equal(state.addPending(sampleItem), true);
+  await state.save();
+
+  const reloaded = new StateStore(file);
+  assert.equal(await reloaded.load(), true);
+  assert.deepEqual(reloaded.pendingItems(), [sampleItem]);
+  assert.equal(reloaded.removePending(sampleItem.id), true);
+  assert.deepEqual(reloaded.pendingItems(), []);
 });
 
 test('损坏状态文件明确失败', async (t) => {
@@ -77,12 +93,16 @@ test('MeoW HTTP、JSON 和业务失败均抛错', async () => {
 
 function memoryState({ existed = false, ids = [] } = {}) {
   const seen = new Set(ids);
+  const pending = new Map();
   return {
     saved: 0,
     async load() { return existed; },
     has(id) { return seen.has(id); },
     add(id) { const before = seen.size; seen.add(id); return seen.size !== before; },
     addMany(values) { return values.reduce((changed, id) => this.add(id) || changed, false); },
+    pendingItems() { return [...pending.values()]; },
+    addPending(item) { if (pending.has(item.id)) return false; pending.set(item.id, item); return true; },
+    removePending(id) { return pending.delete(id); },
     async save() { this.saved += 1; },
     values() { return [...seen]; }
   };
@@ -178,4 +198,56 @@ test('RSS 获取失败时不推进状态', async () => {
   await assert.rejects(() => monitor.poll(), /rss down/);
   assert.deepEqual(state.values(), []);
   assert.equal(state.saved, 0);
+});
+
+test('推送失败后帖子移出 RSS 并重启仍会重试', async (t) => {
+  const { file, state } = await tempState(t);
+  await state.load();
+  await state.save();
+  const first = new Monitor({
+    config: monitorConfig(),
+    fetchItems: async () => [sampleItem],
+    matcher: () => ({ matched: true, reason: 'keyword:VPS' }),
+    pusher: { push: async () => { throw new Error('meow down'); } },
+    state,
+    logger: silentLogger
+  });
+  await first.initialize();
+  await first.poll();
+
+  const reloaded = new StateStore(file);
+  const pushed = [];
+  const second = new Monitor({
+    config: monitorConfig(),
+    fetchItems: async () => [],
+    matcher: () => ({ matched: true, reason: 'keyword:VPS' }),
+    pusher: { push: async (item) => pushed.push(item.id) },
+    state: reloaded,
+    logger: silentLogger
+  });
+  await second.initialize();
+  await second.poll();
+
+  assert.deepEqual(pushed, ['1']);
+  assert.equal(reloaded.has('1'), true);
+  assert.deepEqual(reloaded.pendingItems(), []);
+});
+
+test('有效发布时间先于无效发布时间处理', async () => {
+  const state = memoryState({ existed: true });
+  const attempts = [];
+  const valid = { ...sampleItem, id: 'valid', pubDate: 'Thu, 06 Aug 2026 13:00:00 GMT' };
+  const invalid = { ...sampleItem, id: 'invalid', pubDate: '' };
+  const monitor = new Monitor({
+    config: monitorConfig(),
+    fetchItems: async () => [invalid, valid],
+    matcher: () => ({ matched: true, reason: 'keyword:VPS' }),
+    pusher: { push: async (item) => attempts.push(item.id) },
+    state,
+    logger: silentLogger
+  });
+
+  await monitor.initialize();
+  await monitor.poll();
+  assert.deepEqual(attempts, ['valid', 'invalid']);
 });

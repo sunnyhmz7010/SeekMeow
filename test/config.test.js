@@ -66,6 +66,7 @@ test('非法范围、版块、布尔值、时间、JSON 和正则均拒绝启动
   assert.throws(() => parseConfig({ ...requiredEnv, CATEGORIES: 'unknown' }), /CATEGORIES/);
   assert.throws(() => parseConfig({ ...requiredEnv, PUSH_EXISTING: 'yes' }), /PUSH_EXISTING/);
   assert.throws(() => parseConfig({ ...requiredEnv, CHECK_INTERVAL_SECONDS: '0' }), /CHECK_INTERVAL_SECONDS/);
+  assert.throws(() => parseConfig({ ...requiredEnv, CHECK_INTERVAL_SECONDS: '2147484' }), /CHECK_INTERVAL_SECONDS/);
   assert.throws(() => parseConfig({ ...requiredEnv, KEYWORD_GROUPS: '[invalid' }), /KEYWORD_GROUPS/);
   assert.throws(() => parseConfig({ ...requiredEnv, REGEX_PATTERNS: '["("]' }), /REGEX_PATTERNS/);
 });

@@ -46,6 +46,11 @@ test('解析 RSS 条目并优先使用 guid', () => {
   assert.equal(items[1].id, 'https://www.nodeseek.com/post-1-1');
 });
 
+test('parseFeed 保留 XML 实体表示的普通比较文本', () => {
+  const xml = '<rss><channel><item><title>比较</title><description>价格 &lt; VPS 且内存 &gt; 2G</description><guid>3</guid></item></channel></rss>';
+  assert.equal(parseFeed(xml)[0].summary, '价格 < VPS 且内存 > 2G');
+});
+
 test('缺少 guid 和 link 的条目会被忽略', () => {
   const xml = '<rss><channel><item><title>无 ID</title></item></channel></rss>';
   assert.deepEqual(parseFeed(xml), []);

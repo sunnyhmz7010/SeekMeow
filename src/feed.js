@@ -2,16 +2,12 @@ import { DOMParser } from '@xmldom/xmldom';
 
 const RSS_URL = 'https://rss.nodeseek.com/';
 
-function decodeEntities(value) {
+export function cleanSummary(value = '') {
   const document = new DOMParser({ onError() {} }).parseFromString(
     `<html><body>${value}</body></html>`,
     'text/html'
   );
-  return document.getElementsByTagName('body').item(0)?.textContent ?? value;
-}
-
-export function cleanSummary(value = '') {
-  return decodeEntities(value.replace(/<[^>]*>/g, ' '))
+  return (document.getElementsByTagName('body').item(0)?.textContent ?? value)
     .replace(/\s+/gu, ' ')
     .trim();
 }
