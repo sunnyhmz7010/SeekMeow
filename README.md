@@ -1,18 +1,18 @@
-# NodeSeek MeoW Monitor
+# SeekMeow
 
 直接读取 NodeSeek RSS，按标题或 RSS 摘要匹配关键词，并将新帖推送到 MeoW。无需 NodeSeek 账号、Cookie、浏览器、前端页面、端口映射或目录映射。
 
 ## 构建
 
 ```bash
-docker build -t nodeseek-meow-monitor .
+docker build -t seekmeow .
 ```
 
 ## 启动
 
 ```bash
 docker run -d \
-  --name nodeseek-meow-monitor \
+  --name seekmeow \
   --restart unless-stopped \
   -e MEOW_NICKNAME="你的昵称" \
   -e KEYWORDS="VPS,优惠,补货" \
@@ -23,7 +23,7 @@ docker run -d \
   -e CATEGORIES="all" \
   -e CHECK_INTERVAL_SECONDS="5" \
   -e PUSH_EXISTING="false" \
-  nodeseek-meow-monitor
+  seekmeow
 ```
 
 容器不监听端口，也不要求映射目录。首次启动默认把当前 RSS 条目作为基线，只推送之后出现的新帖；设置 `PUSH_EXISTING=true` 后会同时检查当前 RSS 中已有的帖子。
@@ -53,7 +53,7 @@ docker run -d \
 ## 日志与去重
 
 ```bash
-docker logs -f nodeseek-meow-monitor
+docker logs -f seekmeow
 ```
 
 同一容器执行 `docker restart` 时会保留去重状态和待重试消息；删除并重建容器后，按照 `PUSH_EXISTING` 重新执行首次扫描规则。
