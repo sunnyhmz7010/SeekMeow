@@ -4,7 +4,7 @@
 </div>
 
 <p align="center">
-  <a href="https://github.com/sunnyhmz7010/SeekMeow/releases"><img src="https://img.shields.io/github/v/tag/sunnyhmz7010/SeekMeow?label=Tag&color=3b82f6" alt="Tag" /></a>
+  <a href="https://github.com/sunnyhmz7010/SeekMeow/releases"><img src="https://img.shields.io/github/v/release/sunnyhmz7010/SeekMeow?label=Release&color=3b82f6" alt="Release" /></a>
   <a href="https://github.com/sunnyhmz7010/SeekMeow/blob/main/LICENSE"><img src="https://img.shields.io/github/license/sunnyhmz7010/SeekMeow?color=10b981" alt="License" /></a>
 </p>
 
