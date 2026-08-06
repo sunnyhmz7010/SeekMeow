@@ -1,0 +1,40 @@
+name: Feature Request / 功能建议
+description: Suggest a new feature or improvement / 提交新功能或改进建议
+title: "[Feature] "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for sharing your idea.
+        感谢你提出建议。
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use Case / 使用场景
+      description: What are you trying to do, and where is the current pain point? / 你想做什么，当前卡点在哪里？
+      placeholder: Describe the scenario briefly. / 简要描述场景。
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Expected Improvement / 期望改进
+      description: What would you like SeekMeow to do? / 你希望 SeekMeow 怎么做？
+      placeholder: Describe the feature or behavior you want. / 描述你希望新增的功能或行为。
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered / 备选方案
+      description: Any other approaches you have thought about? / 你考虑过的其他方案？
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist / 提交前确认
+      options:
+        - label: I have searched existing issues before submitting this request. / 我已先搜索过现有 Issue。

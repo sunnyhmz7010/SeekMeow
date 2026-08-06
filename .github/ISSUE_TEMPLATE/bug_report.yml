@@ -1,0 +1,84 @@
+name: Bug Report / 缺陷反馈
+description: Report a reproducible bug in SeekMeow / 提交可复现的问题
+title: "[Bug] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug.
+        感谢你反馈问题。
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Bug Summary / 问题概述
+      description: Describe the issue clearly and concisely. / 请简要描述问题。
+      placeholder: What went wrong? / 出现了什么问题？
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce / 复现步骤
+      description: If possible, list the shortest steps to reproduce it. / 如方便，请提供最小复现步骤。
+      placeholder: |
+        1. ...
+        2. ...
+        3. See error / 出现错误 ...
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version / 版本
+      description: SeekMeow image tag or commit hash. / SeekMeow 镜像标签或 commit hash。
+      placeholder: e.g. latest or commit hash / 例如 latest 或 commit hash
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment / 运行环境
+      description: Docker version, host OS, Node.js version, and all environment variables used. / Docker 版本、宿主机系统、Node.js 版本及使用的全部环境变量。
+      placeholder: |
+        Docker 27.3.1, Ubuntu 22.04, Node.js 24
+        MEOW_NICKNAME=...
+        KEYWORDS=...
+        CHECK_INTERVAL_SECONDS=5
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior / 期望行为
+      description: What should have happened? / 你期望的结果是什么？
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior / 实际行为
+      description: What actually happened? / 实际发生了什么？
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or Screenshots / 日志或截图
+      description: Paste relevant log output or add screenshots. / 贴出相关日志或截图。
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist / 提交前确认
+      options:
+        - label: I have searched existing issues before submitting this report. / 我已先搜索过现有 Issue。
+        - label: I have removed sensitive information from logs and screenshots. / 我已移除日志和截图中的敏感信息。
