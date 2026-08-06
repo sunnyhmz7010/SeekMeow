@@ -54,6 +54,20 @@ test('无效 XML 会明确失败', () => {
   assert.throws(() => parseFeed('<rss><channel>'), /RSS XML/);
 });
 
+test('无效 XML 失败时不会输出解析器诊断', () => {
+  const diagnostics = [];
+  const originalError = console.error;
+  console.error = (...args) => diagnostics.push(args);
+
+  try {
+    assert.throws(() => parseFeed('<rss><channel>'), /RSS XML/);
+  } finally {
+    console.error = originalError;
+  }
+
+  assert.deepEqual(diagnostics, []);
+});
+
 test('RSS 请求失败时抛出包含状态码的错误', async () => {
   const fetchImpl = async () => new Response('error', { status: 503 });
   await assert.rejects(() => fetchFeed({ fetchImpl }), /503/);

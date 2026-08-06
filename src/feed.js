@@ -34,10 +34,19 @@ function textOf(element, tagName) {
 
 export function parseFeed(xml) {
   let document;
+  const parseErrors = [];
   try {
-    document = new DOMParser().parseFromString(xml, 'text/xml');
+    document = new DOMParser({
+      onError(level, message) {
+        parseErrors.push({ level, message });
+      }
+    }).parseFromString(xml, 'text/xml');
   } catch (error) {
     throw new Error(`RSS XML 解析失败: ${error.message}`);
+  }
+
+  if (parseErrors.length > 0) {
+    throw new Error(`RSS XML 解析失败: ${parseErrors[0].message}`);
   }
 
   if (!document?.documentElement || document.getElementsByTagName('parsererror').length > 0) {
