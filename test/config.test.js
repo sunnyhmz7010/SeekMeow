@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { parseConfig } from '../src/config.js';
+import { CATEGORY_SLUGS, parseConfig } from '../src/config.js';
 
 const requiredEnv = {
   MEOW_NICKNAME: 'tester',
@@ -38,8 +38,18 @@ test('解析普通词、组合词、屏蔽词、正则和多版块', () => {
   assert.deepEqual(config.keywordGroups, [['香港', 'VPS'], ['日本', '线路']]);
   assert.deepEqual(config.blockedKeywords, ['求购', '已收']);
   assert.deepEqual(config.regexPatterns.map((pattern) => pattern.source), ['年付\\s*\\d+', '香港|日本']);
+  assert.deepEqual(config.regexPatterns.map((pattern) => pattern.flags), ['iu', 'iu']);
   assert.deepEqual([...config.categories], ['trade', 'daily']);
   assert.equal(config.pushExisting, true);
+});
+
+test('公开版块集合不可修改且不能放宽配置校验', () => {
+  assert.equal(Object.isFrozen(CATEGORY_SLUGS), true);
+  assert.equal(typeof CATEGORY_SLUGS.add, 'undefined');
+  assert.equal(typeof CATEGORY_SLUGS.delete, 'undefined');
+  assert.equal(typeof CATEGORY_SLUGS.clear, 'undefined');
+  assert.throws(() => CATEGORY_SLUGS.add('unknown'), TypeError);
+  assert.throws(() => parseConfig({ ...requiredEnv, CATEGORIES: 'unknown' }), /CATEGORIES/);
 });
 
 test('缺少昵称时拒绝启动', () => {

@@ -1,7 +1,31 @@
-export const CATEGORY_SLUGS = new Set([
+const CATEGORY_SLUG_SET = new Set([
   'daily', 'tech', 'info', 'review', 'trade', 'carpool', 'promo',
   'life', 'dev', 'photo-share', 'expose', 'inner', 'sandbox'
 ]);
+
+export const CATEGORY_SLUGS = Object.freeze({
+  get size() {
+    return CATEGORY_SLUG_SET.size;
+  },
+  has(value) {
+    return CATEGORY_SLUG_SET.has(value);
+  },
+  entries() {
+    return CATEGORY_SLUG_SET.entries();
+  },
+  keys() {
+    return CATEGORY_SLUG_SET.keys();
+  },
+  values() {
+    return CATEGORY_SLUG_SET.values();
+  },
+  forEach(callback, thisArg) {
+    CATEGORY_SLUG_SET.forEach((value) => callback.call(thisArg, value, value, CATEGORY_SLUGS));
+  },
+  [Symbol.iterator]() {
+    return CATEGORY_SLUG_SET[Symbol.iterator]();
+  }
+});
 
 const MATCH_SCOPES = new Set(['title', 'summary', 'all']);
 
@@ -77,7 +101,7 @@ export function parseConfig(env = process.env) {
 
   const categoryValue = (env.CATEGORIES ?? 'all').trim();
   const categories = categoryValue === 'all' ? null : new Set(splitCsv(categoryValue));
-  if (categories && ([...categories].length === 0 || [...categories].some((slug) => !CATEGORY_SLUGS.has(slug)))) {
+  if (categories && ([...categories].length === 0 || [...categories].some((slug) => !CATEGORY_SLUG_SET.has(slug)))) {
     throw new Error('CATEGORIES 包含不支持的版块 slug');
   }
 
