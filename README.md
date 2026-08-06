@@ -32,9 +32,9 @@ NodeSeek 上 VPS 优惠、补货等情报稍纵即逝，人工盯版块既费时
 
 ### 📦 安装与运行
 
-```bash
-docker build -t seekmeow .
+镜像已发布到 GitHub Container Registry，直接拉取运行即可：
 
+```bash
 docker run -d \
   --name seekmeow \
   --restart unless-stopped \
@@ -47,7 +47,7 @@ docker run -d \
   -e CATEGORIES="all" \
   -e CHECK_INTERVAL_SECONDS="5" \
   -e PUSH_EXISTING="false" \
-  seekmeow
+  ghcr.io/sunnyhmz7010/seekmeow:latest
 ```
 
 容器不监听端口，也不要求映射目录。首次启动默认把当前 RSS 条目作为基线，只推送之后出现的新帖；设置 `PUSH_EXISTING=true` 后会同时检查 RSS 中已有的帖子。
