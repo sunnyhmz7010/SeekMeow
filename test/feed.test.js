@@ -27,6 +27,7 @@ const RSS = `<?xml version="1.0" encoding="UTF-8"?>
 test('清理摘要中的 HTML、实体和多余空白', () => {
   assert.equal(cleanSummary('<p>年付&nbsp;100 元 &amp; 可退款</p>'), '年付 100 元 & 可退款');
   assert.equal(cleanSummary('1 &lt; 2 &amp;&amp; 3 &gt; 2'), '1 < 2 && 3 > 2');
+  assert.equal(cleanSummary('&copy; &mdash; &hellip;'), '© — …');
 });
 
 test('解析 RSS 条目并优先使用 guid', () => {
@@ -71,4 +72,15 @@ test('无效 XML 失败时不会输出解析器诊断', () => {
 test('RSS 请求失败时抛出包含状态码的错误', async () => {
   const fetchImpl = async () => new Response('error', { status: 503 });
   await assert.rejects(() => fetchFeed({ fetchImpl }), /503/);
+});
+
+test('RSS 请求固定使用 NodeSeek RSS 地址', async () => {
+  let requestedUrl;
+  const fetchImpl = async (url) => {
+    requestedUrl = url;
+    return new Response('<rss><channel></channel></rss>', { status: 200 });
+  };
+
+  await fetchFeed({ fetchImpl });
+  assert.equal(requestedUrl, 'https://rss.nodeseek.com/');
 });

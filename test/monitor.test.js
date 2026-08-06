@@ -1,0 +1,181 @@
+import assert from 'node:assert/strict';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+import test from 'node:test';
+
+import { createMeowClient, formatMessage } from '../src/meow.js';
+import { Monitor } from '../src/monitor.js';
+import { StateStore } from '../src/state.js';
+
+const sampleItem = {
+  id: '1',
+  title: '香港 VPS 补货',
+  summary: '年付 100 元',
+  link: 'https://www.nodeseek.com/post-1-1',
+  category: 'trade',
+  creator: 'alice',
+  pubDate: 'Thu, 06 Aug 2026 13:09:07 GMT'
+};
+
+async function tempState(t, limit = 1000) {
+  const directory = await mkdtemp(path.join(tmpdir(), 'nodeseek-meow-'));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  return { directory, file: path.join(directory, 'state.json'), state: new StateStore(path.join(directory, 'state.json'), limit) };
+}
+
+test('状态可持久化且只保留最近 ID', async (t) => {
+  const { file, state } = await tempState(t, 2);
+  assert.equal(await state.load(), false);
+  state.addMany(['1', '2', '3']);
+  await state.save();
+  assert.deepEqual(JSON.parse(await readFile(file, 'utf8')), { processedIds: ['2', '3'] });
+
+  const reloaded = new StateStore(file, 2);
+  assert.equal(await reloaded.load(), true);
+  assert.equal(reloaded.has('2'), true);
+  assert.equal(reloaded.has('1'), false);
+});
+
+test('损坏状态文件明确失败', async (t) => {
+  const { file, state } = await tempState(t);
+  await writeFile(file, '{invalid', 'utf8');
+  await assert.rejects(() => state.load(), /状态文件/);
+});
+
+test('构造 MeoW 纯文本消息并 POST JSON', async () => {
+  let request;
+  const fetchImpl = async (url, options) => {
+    request = { url, options };
+    return new Response(JSON.stringify({ status: 200, message: '推送成功' }), { status: 200 });
+  };
+  const client = createMeowClient({ nickname: '测试 用户', fetchImpl });
+
+  await client.push(sampleItem);
+
+  assert.equal(request.url, 'https://api.chuckfang.com/%E6%B5%8B%E8%AF%95%20%E7%94%A8%E6%88%B7/NodeSeek?msgType=text');
+  assert.equal(request.options.method, 'POST');
+  assert.deepEqual(JSON.parse(request.options.body), {
+    title: sampleItem.title,
+    msg: formatMessage(sampleItem),
+    url: sampleItem.link
+  });
+});
+
+test('MeoW HTTP、JSON 和业务失败均抛错', async () => {
+  const cases = [
+    async () => new Response('error', { status: 503 }),
+    async () => new Response('not-json', { status: 200 }),
+    async () => new Response(JSON.stringify({ status: 400, msg: '参数错误' }), { status: 200 })
+  ];
+
+  for (const fetchImpl of cases) {
+    const client = createMeowClient({ nickname: 'tester', fetchImpl });
+    await assert.rejects(() => client.push(sampleItem));
+  }
+});
+
+function memoryState({ existed = false, ids = [] } = {}) {
+  const seen = new Set(ids);
+  return {
+    saved: 0,
+    async load() { return existed; },
+    has(id) { return seen.has(id); },
+    add(id) { const before = seen.size; seen.add(id); return seen.size !== before; },
+    addMany(values) { return values.reduce((changed, id) => this.add(id) || changed, false); },
+    async save() { this.saved += 1; },
+    values() { return [...seen]; }
+  };
+}
+
+const silentLogger = { info() {}, warn() {}, error() {} };
+const monitorConfig = (overrides = {}) => ({
+  checkIntervalMs: 5,
+  pushExisting: false,
+  matchScope: 'all',
+  keywords: ['VPS'],
+  keywordGroups: [],
+  blockedKeywords: [],
+  regexPatterns: [],
+  categories: null,
+  ...overrides
+});
+
+test('首次启动默认建立基线而不推送', async () => {
+  const state = memoryState();
+  const pushed = [];
+  const monitor = new Monitor({
+    config: monitorConfig(),
+    fetchItems: async () => [sampleItem],
+    matcher: () => ({ matched: true, reason: 'keyword:VPS' }),
+    pusher: { push: async (item) => pushed.push(item.id) },
+    state,
+    logger: silentLogger
+  });
+
+  await monitor.initialize();
+  await monitor.poll();
+  assert.deepEqual(pushed, []);
+  assert.deepEqual(state.values(), ['1']);
+  assert.equal(state.saved, 1);
+});
+
+test('PUSH_EXISTING=true 时首次扫描推送已有命中帖', async () => {
+  const state = memoryState();
+  const pushed = [];
+  const monitor = new Monitor({
+    config: monitorConfig({ pushExisting: true }),
+    fetchItems: async () => [sampleItem],
+    matcher: () => ({ matched: true, reason: 'keyword:VPS' }),
+    pusher: { push: async (item) => pushed.push(item.id) },
+    state,
+    logger: silentLogger
+  });
+
+  await monitor.initialize();
+  await monitor.poll();
+  assert.deepEqual(pushed, ['1']);
+  assert.deepEqual(state.values(), ['1']);
+});
+
+test('按旧到新处理，未命中去重，推送失败下轮重试', async () => {
+  const old = { ...sampleItem, id: '1', pubDate: 'Thu, 06 Aug 2026 13:00:00 GMT' };
+  const failed = { ...sampleItem, id: '2', pubDate: 'Thu, 06 Aug 2026 13:01:00 GMT' };
+  const unmatched = { ...sampleItem, id: '3', pubDate: 'Thu, 06 Aug 2026 13:02:00 GMT' };
+  const state = memoryState({ existed: true });
+  const attempts = [];
+  let failOnce = true;
+  const monitor = new Monitor({
+    config: monitorConfig(),
+    fetchItems: async () => [unmatched, failed, old],
+    matcher: (item) => ({ matched: item.id !== '3', reason: item.id === '3' ? 'no-match' : 'keyword:VPS' }),
+    pusher: { async push(item) { attempts.push(item.id); if (item.id === '2' && failOnce) { failOnce = false; throw new Error('temporary'); } } },
+    state,
+    logger: silentLogger
+  });
+
+  await monitor.initialize();
+  await monitor.poll();
+  assert.deepEqual(attempts, ['1', '2']);
+  assert.deepEqual(state.values(), ['1', '3']);
+  await monitor.poll();
+  assert.deepEqual(attempts, ['1', '2', '2']);
+  assert.deepEqual(state.values(), ['1', '3', '2']);
+});
+
+test('RSS 获取失败时不推进状态', async () => {
+  const state = memoryState({ existed: true });
+  const monitor = new Monitor({
+    config: monitorConfig(),
+    fetchItems: async () => { throw new Error('rss down'); },
+    matcher: () => ({ matched: true, reason: 'keyword:VPS' }),
+    pusher: { push: async () => {} },
+    state,
+    logger: silentLogger
+  });
+
+  await monitor.initialize();
+  await assert.rejects(() => monitor.poll(), /rss down/);
+  assert.deepEqual(state.values(), []);
+  assert.equal(state.saved, 0);
+});

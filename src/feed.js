@@ -2,24 +2,12 @@ import { DOMParser } from '@xmldom/xmldom';
 
 const RSS_URL = 'https://rss.nodeseek.com/';
 
-const NAMED_ENTITIES = new Map([
-  ['nbsp', ' '], ['amp', '&'], ['lt', '<'], ['gt', '>'],
-  ['quot', '"'], ['apos', "'"], ['#39', "'"]
-]);
-
 function decodeEntities(value) {
-  return value.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/giu, (match, entity) => {
-    const lower = entity.toLowerCase();
-    const codePoint = lower.startsWith('#x')
-      ? Number.parseInt(lower.slice(2), 16)
-      : lower.startsWith('#') ? Number.parseInt(lower.slice(1), 10) : null;
-    if (codePoint !== null) {
-      return Number.isInteger(codePoint) && codePoint >= 0 && codePoint <= 0x10ffff
-        ? String.fromCodePoint(codePoint)
-        : match;
-    }
-    return NAMED_ENTITIES.get(lower) ?? match;
-  });
+  const document = new DOMParser({ onError() {} }).parseFromString(
+    `<html><body>${value}</body></html>`,
+    'text/html'
+  );
+  return document.getElementsByTagName('body').item(0)?.textContent ?? value;
 }
 
 export function cleanSummary(value = '') {
@@ -71,10 +59,9 @@ export function parseFeed(xml) {
 
 export async function fetchFeed({
   fetchImpl = globalThis.fetch,
-  url = RSS_URL,
   timeoutMs = 15000
 } = {}) {
-  const response = await fetchImpl(url, {
+  const response = await fetchImpl(RSS_URL, {
     headers: { 'user-agent': 'nodeseek-meow-monitor/1.0' },
     signal: AbortSignal.timeout(timeoutMs)
   });
