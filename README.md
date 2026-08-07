@@ -1,6 +1,6 @@
 <div align="center">
   <h1>SeekMeow</h1>
-  <p>直接读取 NodeSeek RSS，按标题或摘要匹配关键词，将新帖实时推送到 MeoW。</p>
+  <p>自动监控 NodeSeek 新帖，按关键词筛选后推送到 MeoW。</p>
 </div>
 
 <p align="center">
@@ -12,7 +12,11 @@
 
 ## ✨ 为什么做这个项目
 
-NodeSeek 上 VPS 优惠、补货等情报稍纵即逝，人工盯版块既费时又容易错过。SeekMeow 直接订阅 NodeSeek 官方 RSS，通过关键词、组合词、正则等规则自动筛选帖子，并推送到 MeoW。整个过程无需 NodeSeek 账号、Cookie 或浏览器，也不需要任何端口映射，一个容器即可长期稳定运行。
+NodeSeek 上的 VPS 优惠、补货信息转瞬即逝，手动刷新既费时又容易错过。SeekMeow 自动订阅 NodeSeek 官方 RSS，根据你设置的关键词筛选帖子并推送到 MeoW。全程不需要 NodeSeek 账号或浏览器，一个 Docker 命令就能跑起来。
+
+## 📸 截图预览
+
+![SeekMeow 推送效果](screenshot-notification.png)
 
 ## 🚀 核心能力
 
@@ -134,10 +138,6 @@ docker run -d \
 ### 匹配规则
 
 屏蔽词优先。未命中屏蔽词时，普通关键词任意命中、任意组合规则全词命中、任意正则命中，满足其中一种便推送。
-
-### 推送内容
-
-MeoW 通知标题使用 RSS 原标题；通知图标固定使用 NodeSeek 图标；点击通知会打开命中的 NodeSeek 帖子链接。正文会显示中文版块、作者、触发关键词、中文发布时间和完整 RSS 摘要。
 
 ### 日志与去重
 
