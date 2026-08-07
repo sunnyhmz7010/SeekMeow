@@ -1,6 +1,6 @@
 <div align="center">
   <h1>SeekMeow</h1>
-  <p>直接读取 NodeSeek RSS，按标题或摘要匹配关键词，将新帖实时推送到 MeoW。</p>
+  <p>自动监控 NodeSeek 新帖，按关键词筛选后推送到 MeoW。</p>
 </div>
 
 <p align="center">
@@ -12,28 +12,59 @@
 
 ## ✨ 为什么做这个应用
 
-NodeSeek 上 VPS 优惠、补货等情报稍纵即逝，人工盯版块既费时又容易错过。SeekMeow 直接订阅 NodeSeek 官方 RSS，通过关键词、组合词、正则等规则自动筛选帖子，并推送到 MeoW。整个过程无需 NodeSeek 账号、Cookie 或浏览器，也不需要任何端口映射，一个容器即可长期稳定运行。
+NodeSeek 上的 VPS 优惠、补货信息转瞬即逝，手动刷新既费时又容易错过。SeekMeow 自动订阅 NodeSeek 官方 RSS，根据你设置的关键词筛选帖子并推送到 MeoW。全程不需要 NodeSeek 账号或浏览器，一个 Docker 命令就能跑起来。
 
-## 🚀 核心能力
+## 🚀 功能特点
 
-- 官方 RSS 直连：只依赖 `https://rss.nodeseek.com/`，无需账号、Cookie、前端页面或端口映射
-- 灵活匹配规则：普通关键词、组合关键词、正则表达式三种规则可叠加，还支持版块过滤与屏蔽词
-- 精准命中范围：可单独匹配标题或 RSS 摘要，也可同时匹配两者
-- 友好通知内容：推送正文显示中文版块、作者、关键词、中文发布时间和完整摘要，并使用 NodeSeek 图标
-- 失败自动重试：推送失败的消息持久化保留，容器重启后继续补推
-- 去重防打扰：已处理帖子记录在本地状态文件，同一帖绝不重复推送
-- 轻量容器化：Node.js 24 Alpine 镜像，Docker 一条命令启动，零配置目录挂载
+- 订阅 NodeSeek 官方 RSS，无需登录
+- 支持普通关键词、组合关键词、正则表达式三种筛选方式
+- 支持按版块过滤和屏蔽词排除
+- 可单独匹配标题或摘要，也可同时匹配
+- 推送内容包含版块、作者、发布时间和帖子摘要，点击直达原文
+- 推送失败自动重试，重启后不会丢失
+- 已推送的帖子不会重复通知
+- Docker 一键部署，无需映射端口或目录
 
 ## ⚡ 快速开始
 
 ### 📋 前置要求
 
 - Docker（18.09+）
-- 一个 MeoW 用户昵称（`https://api.chuckfang.com/{昵称}/NodeSeek`）
+- 一个 MeoW 昵称（`https://api.chuckfang.com/{你的昵称}/NodeSeek`）
 
-### 📦 安装与运行
+### 📦 Docker Compose（推荐）
 
-镜像已发布到 GitHub Container Registry，直接拉取运行即可：
+新建 `compose.yaml`，写入以下内容：
+
+```yaml
+services:
+  seekmeow:
+    image: ghcr.io/sunnyhmz7010/seekmeow:latest
+    container_name: seekmeow
+    restart: unless-stopped
+    environment:
+      - MEOW_NICKNAME=你的昵称
+      - KEYWORDS=VPS,优惠,补货
+      - KEYWORD_GROUPS=[["香港","VPS"],["日本","线路"]]
+      - BLOCK_KEYWORDS=求购,已收
+      - REGEX_PATTERNS=["年付\\s*\\d+","香港|日本"]
+      - MATCH_SCOPE=all
+      - CATEGORIES=all
+      - CHECK_INTERVAL_SECONDS=5
+      - PUSH_EXISTING=false
+```
+
+然后启动：
+
+```bash
+docker compose up -d
+```
+
+查看日志：
+
+```bash
+docker compose logs -f
+```
 
 ### 🖥️ 命令行方式
 
@@ -53,56 +84,61 @@ docker run -d \
   ghcr.io/sunnyhmz7010/seekmeow:latest
 ```
 
-### 🧩 Docker Compose 方式
+### 🛠️ 自行构建镜像
 
-项目已提供 [compose.yaml](./compose.yaml)，按需修改其中的环境变量后启动：
-
-```bash
-docker compose up -d --build
-```
-
-查看日志：
+如果你想自己构建而不是使用预构建镜像：
 
 ```bash
-docker compose logs -f
+git clone https://github.com/sunnyhmz7010/SeekMeow.git
+cd SeekMeow
+docker build -t seekmeow .
+docker run -d \
+  --name seekmeow \
+  --restart unless-stopped \
+  -e MEOW_NICKNAME="你的昵称" \
+  -e KEYWORDS="VPS,优惠,补货" \
+  seekmeow
 ```
 
-容器不监听端口，也不要求映射目录。启动时会先向 MeoW 发送一条测试推送；测试推送失败时容器会启动失败，并在日志中显示错误。首次启动默认把当前 RSS 条目作为基线，只推送之后出现的新帖；设置 `PUSH_EXISTING=true` 后会同时检查当前 RSS 中已有的帖子。
+如果用 Docker Compose，把 `compose.yaml` 里的 `image: ghcr.io/...` 换成 `build: .`，然后 `docker compose up -d --build`。
+
+### 📌 首次运行说明
+
+启动时会先向 MeoW 发送一条测试推送；如果测试推送失败，容器会报错退出，方便排查配置问题。
+
+首次启动默认不会推送 RSS 中已有的旧帖，只推送之后出现的新帖。如果需要把当前已有的帖子也检查一遍，设置 `PUSH_EXISTING=true`。
 
 ## 📖 使用说明
 
 ### 环境变量
 
-不同配置入口的引号规则：
-
-- 图形化 Docker 界面：不要加外层引号，值直接填 `false`、`all`、`VPS,优惠,补货`。
-- Docker Compose：使用 `compose.yaml` 中的列表写法时，不需要外层引号。
-- 命令行 `docker run -e`：简单值不需要引号；中文、逗号、JSON、正则建议加引号，避免被 shell 错误拆分。
-- JSON 配置值内部的双引号必须保留，例如 `KEYWORD_GROUPS=[["香港","VPS"]]`；不要再额外包一层 `"..."` 或 `'...'`，除非是在命令行里保护 shell 解析。
-
 | 变量 | 必填 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `MEOW_NICKNAME` | 是 | - | MeoW 用户昵称，不允许包含 `/` |
-| `CHECK_INTERVAL_SECONDS` | 否 | `5` | 检查间隔，单位为秒，范围为 1-2147483 |
-| `MATCH_SCOPE` | 否 | `all` | `title`、`summary` 或 `all`；`summary` 是 RSS 摘要，不是完整正文 |
-| `KEYWORDS` | 条件必填 | - | 英文逗号分隔，任意关键词命中即可 |
-| `KEYWORD_GROUPS` | 条件必填 | `[]` | JSON 二维数组，同组内所有词都命中才成立 |
-| `BLOCK_KEYWORDS` | 否 | - | 英文逗号分隔，任意屏蔽词命中便不推送 |
-| `REGEX_PATTERNS` | 条件必填 | `[]` | JSON 字符串数组，任意正则命中即可，固定使用 `iu` 标志 |
-| `CATEGORIES` | 否 | `all` | `all` 或逗号分隔的版块 slug |
-| `PUSH_EXISTING` | 否 | `false` | 首次启动是否处理 RSS 中已有帖子 |
+| `MEOW_NICKNAME` | 是 | - | MeoW 昵称，不能包含 `/` |
+| `CHECK_INTERVAL_SECONDS` | 否 | `5` | 检查新帖的间隔（秒），范围 1-2147483 |
+| `MATCH_SCOPE` | 否 | `all` | `title`（仅标题）、`summary`（仅摘要）、`all`（同时匹配） |
+| `KEYWORDS` | 条件必填 | - | 英文逗号分隔，命中任意一个即推送 |
+| `KEYWORD_GROUPS` | 条件必填 | `[]` | 多组关键词，同组内的词必须全部命中才推送，如 `[["香港","VPS"],["日本","线路"]]` |
+| `BLOCK_KEYWORDS` | 否 | - | 英文逗号分隔，命中任意一个就不推送 |
+| `REGEX_PATTERNS` | 条件必填 | `[]` | 正则表达式列表，命中任意一个即推送，如 `["年付\\s*\\d+","香港|日本"]` |
+| `CATEGORIES` | 否 | `all` | `all`（所有版块）或用英文逗号分隔的版块标识 |
+| `PUSH_EXISTING` | 否 | `false` | 首次启动时是否也检查 RSS 中已有的帖子 |
 
-`KEYWORDS`、`KEYWORD_GROUPS`、`REGEX_PATTERNS` 至少配置一种。
+> `KEYWORDS`、`KEYWORD_GROUPS`、`REGEX_PATTERNS` 至少配置一种。
 
-可用版块 slug：`daily`、`tech`、`info`、`review`、`trade`、`carpool`、`promo`、`life`、`dev`、`photo-share`、`expose`、`inner`、`sandbox`。
+可选版块标识：
+`daily` `tech` `info` `review` `trade` `carpool` `promo` `life` `dev` `photo-share` `expose` `inner` `sandbox`
 
 ### 匹配规则
 
-屏蔽词优先。未命中屏蔽词时，普通关键词任意命中、任意组合规则全词命中、任意正则命中，满足其中一种便推送。
+屏蔽词优先级最高。没有命中屏蔽词时，只要满足以下任一条件就会推送：
+- 普通关键词命中
+- 某组关键词全部命中
+- 正则表达式命中
 
 ### 推送内容
 
-MeoW 通知标题使用 RSS 原标题；通知图标固定使用 NodeSeek 图标；点击通知会打开命中的 NodeSeek 帖子链接。正文会显示中文版块、作者、触发关键词、中文发布时间和完整 RSS 摘要。
+MeoW 通知标题为帖子原标题，图标为 NodeSeek 图标，点击通知会跳转到对应帖子。正文显示版块、作者、触发关键词、发布时间和帖子摘要。
 
 ### 日志与去重
 
@@ -110,15 +146,15 @@ MeoW 通知标题使用 RSS 原标题；通知图标固定使用 NodeSeek 图标
 docker logs -f seekmeow
 ```
 
-同一容器执行 `docker restart` 时会保留去重状态和待重试消息；删除并重建容器后，按照 `PUSH_EXISTING` 重新执行首次扫描规则。
+重启容器（`docker restart`）会保留已处理和待重试的记录；删除并重建容器后，会按 `PUSH_EXISTING` 设置重新扫描。
 
 ## 🧠 功能细节
 
-- 状态持久化：已处理帖子 ID 与待重试消息保存在 `/app/data/state.json`，采用临时文件 + 原子重命名写入，避免中途崩溃损坏状态
-- 无头静默解析：RSS 摘要经 XML 解析清洗为纯文本再参与匹配，规避 HTML 干扰
-- 优先级策略：屏蔽词 > 版块过滤 > 关键词 > 组合词 > 正则，命中即推送
-- 有序轮询：条目按发布时间升序处理，保证补推顺序与真实发帖顺序一致
-- 优雅退出：收到 `SIGTERM` / `SIGINT` 后等待当前轮次完成再退出，避免状态丢失
+- 运行记录保存在本地，重启不会丢失
+- RSS 内容自动清洗为纯文本再匹配，不受 HTML 标签干扰
+- 匹配优先级：屏蔽词 > 版块过滤 > 关键词 > 组合词 > 正则
+- 帖子按发布时间顺序处理，推送不会乱序
+- 程序退出前会完成当前一轮检查，不会丢失数据
 
 ## 🧱 技术栈
 
@@ -161,11 +197,11 @@ npm test
 
 ## 🔐 安全报告
 
-如果发现安全问题，请不要公开披露细节。请优先参考仓库中的 [SECURITY.md](./SECURITY.md) 提交安全报告。
+如果发现安全问题，请不要公开披露。请参考 [SECURITY.md](./SECURITY.md) 提交报告。
 
 ## 📄 许可证
 
-本项目基于 [GPL-3.0](./LICENSE) 开源。
+[GPL-3.0](./LICENSE)
 
 <div align="center">
   <sub>Built with ❤️ by Sunny</sub>
