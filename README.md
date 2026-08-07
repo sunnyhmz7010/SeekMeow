@@ -125,15 +125,15 @@ docker run -d \
 | `MEOW_NICKNAME` | 是 | - | MeoW 昵称，不能包含 `/` |
 | `CHECK_INTERVAL_SECONDS` | 否 | `5` | 检查新帖的间隔（秒），范围 1-2147483 |
 | `MATCH_SCOPE` | 否 | `all` | `title`（仅标题）、`summary`（仅摘要）、`all`（同时匹配） |
-| `KEYWORDS` | 条件必填 | - | 英文逗号分隔，命中任意一个即推送。设置了 `PUSH_CATEGORY` 则可不填 |
-| `KEYWORD_GROUPS` | 条件必填 | `[]` | 多组关键词，同组内的词必须全部命中才推送，如 `[["香港","VPS"],["日本","线路"]]`。设置了 `PUSH_CATEGORY` 则可不填 |
-| `BLOCK_KEYWORDS` | 否 | - | 英文逗号分隔，命中任意一个就不推送。屏蔽词在所有模式下均生效 |
-| `REGEX_PATTERNS` | 条件必填 | `[]` | 正则表达式列表，命中任意一个即推送，如 `["年付\\s*\\d+","香港|日本"]`。设置了 `PUSH_CATEGORY` 则可不填 |
+| `KEYWORDS` | 条件必填 | - | 英文逗号分隔，命中任意一个即推送 |
+| `KEYWORD_GROUPS` | 条件必填 | `[]` | 多组关键词，同组内的词必须全部命中才推送，如 `[["香港","VPS"],["日本","线路"]]` |
+| `REGEX_PATTERNS` | 条件必填 | `[]` | 正则表达式列表，命中任意一个即推送，如 `["年付\\s*\\d+","香港|日本"]` |
+| `PUSH_CATEGORY` | 条件必填 | - | 版块直推模式。设为 `all` 推送所有版块，设为具体版块标识（如 `trade`）仅推送该版块。此模式下不命中屏蔽词即推送，无需关键词 |
+| `BLOCK_KEYWORDS` | 否 | - | 英文逗号分隔，命中任意一个就不推送，所有模式下均生效 |
 | `CATEGORIES` | 否 | `all` | `all`（所有版块）或用英文逗号分隔的版块标识 |
-| `PUSH_CATEGORY` | 否 | - | 版块直推模式。设为 `all` 时所有版块帖子直接推送；设为具体版块标识（如 `trade`）时仅推送该版块帖子。此模式下不命中屏蔽词即推送，无需再配置关键词 |
 | `PUSH_EXISTING` | 否 | `false` | 首次启动时是否也检查 RSS 中已有的帖子 |
 
-> `KEYWORDS`、`KEYWORD_GROUPS`、`REGEX_PATTERNS` 至少配置一种；如果设置了 `PUSH_CATEGORY` 则这三项可以不填。
+> `KEYWORDS`、`KEYWORD_GROUPS`、`REGEX_PATTERNS`、`PUSH_CATEGORY` 四项至少配置一种。
 
 可选版块标识：
 `daily` `tech` `info` `review` `trade` `carpool` `promo` `life` `dev` `photo-share` `expose` `inner` `sandbox`
@@ -142,9 +142,7 @@ docker run -d \
 
 屏蔽词优先，在所有模式下均生效。
 
-**关键词模式（默认）**：未命中屏蔽词时，普通关键词任意命中、任意组合规则全词命中、任意正则命中，满足其中一种便推送。
-
-**版块直推模式**（设置 `PUSH_CATEGORY` 后生效）：忽略关键词、组合词和正则，只要帖子属于指定版块且不命中屏蔽词即推送。此模式下 `KEYWORDS` 等正向规则可不填。
+未命中屏蔽词时，满足以下任一条件即推送：普通关键词任意命中、组合规则全词命中、正则命中，或属于 `PUSH_CATEGORY` 指定的版块。
 
 ### 日志与去重
 
