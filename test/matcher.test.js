@@ -65,3 +65,25 @@ test('版块不匹配时直接排除', () => {
     { matched: false, reason: 'category' }
   );
 });
+
+test('PUSH_CATEGORY 命中时跳过关键词直接推送', () => {
+  assert.deepEqual(
+    matchItem(item, config({ pushCategory: 'trade' })),
+    { matched: true, reason: 'category-push:trade' }
+  );
+  assert.deepEqual(
+    matchItem(item, config({ pushCategory: 'all' })),
+    { matched: true, reason: 'category-push:trade' }
+  );
+  assert.deepEqual(
+    matchItem(item, config({ pushCategory: 'daily' })),
+    { matched: false, reason: 'category-mismatch' }
+  );
+});
+
+test('PUSH_CATEGORY 模式下屏蔽词仍然优先', () => {
+  assert.deepEqual(
+    matchItem(item, config({ pushCategory: 'trade', blockedKeywords: ['VPS'] })),
+    { matched: false, reason: 'blocked:VPS' }
+  );
+});

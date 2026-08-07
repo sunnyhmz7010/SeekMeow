@@ -59,6 +59,8 @@ test('缺少昵称时拒绝启动', () => {
 
 test('未配置正向规则时拒绝启动', () => {
   assert.throws(() => parseConfig({ MEOW_NICKNAME: 'tester' }), /正向规则/);
+  const config = parseConfig({ MEOW_NICKNAME: 'tester', PUSH_CATEGORY: 'trade' });
+  assert.equal(config.pushCategory, 'trade');
 });
 
 test('非法范围、版块、布尔值、时间、JSON 和正则均拒绝启动', () => {
@@ -69,4 +71,11 @@ test('非法范围、版块、布尔值、时间、JSON 和正则均拒绝启动
   assert.throws(() => parseConfig({ ...requiredEnv, CHECK_INTERVAL_SECONDS: '2147484' }), /CHECK_INTERVAL_SECONDS/);
   assert.throws(() => parseConfig({ ...requiredEnv, KEYWORD_GROUPS: '[invalid' }), /KEYWORD_GROUPS/);
   assert.throws(() => parseConfig({ ...requiredEnv, REGEX_PATTERNS: '["("]' }), /REGEX_PATTERNS/);
+});
+
+test('PUSH_CATEGORY 解析与校验', () => {
+  assert.equal(parseConfig(requiredEnv).pushCategory, null);
+  assert.equal(parseConfig({ ...requiredEnv, PUSH_CATEGORY: 'all' }).pushCategory, 'all');
+  assert.equal(parseConfig({ ...requiredEnv, PUSH_CATEGORY: 'trade' }).pushCategory, 'trade');
+  assert.throws(() => parseConfig({ ...requiredEnv, PUSH_CATEGORY: 'unknown' }), /PUSH_CATEGORY/);
 });

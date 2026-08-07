@@ -96,8 +96,20 @@ export function parseConfig(env = process.env) {
     throw new Error(`REGEX_PATTERNS 包含无效正则: ${error.message}`);
   }
 
-  if (keywords.length === 0 && keywordGroups.length === 0 && regexPatterns.length === 0) {
-    throw new Error('至少需要配置一种正向规则');
+  const pushCategoryValue = (env.PUSH_CATEGORY ?? '').trim();
+  let pushCategory = null;
+  if (pushCategoryValue) {
+    if (pushCategoryValue === 'all') {
+      pushCategory = 'all';
+    } else if (CATEGORY_SLUG_SET.has(pushCategoryValue)) {
+      pushCategory = pushCategoryValue;
+    } else {
+      throw new Error('PUSH_CATEGORY 必须是 all 或有效的版块标识');
+    }
+  }
+
+  if (keywords.length === 0 && keywordGroups.length === 0 && regexPatterns.length === 0 && !pushCategory) {
+    throw new Error('至少需要配置一种正向规则或设置 PUSH_CATEGORY');
   }
 
   const categoryValue = (env.CATEGORIES ?? 'all').trim();
@@ -115,6 +127,7 @@ export function parseConfig(env = process.env) {
     blockedKeywords,
     regexPatterns,
     categories,
+    pushCategory,
     pushExisting: parseBoolean(env.PUSH_EXISTING, 'PUSH_EXISTING', false)
   };
 }

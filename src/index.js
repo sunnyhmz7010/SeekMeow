@@ -20,13 +20,15 @@ export function createLogger() {
 export function describeConfig(config) {
   const categories = config.categories ? [...config.categories].join(',') : 'all';
   const ruleCount = config.keywords.length + config.keywordGroups.length + config.regexPatterns.length;
-  return [
+  const parts = [
     `MeoW 昵称 ${config.meowNickname}`,
     `轮询间隔 ${config.checkIntervalMs / 1000} 秒`,
     `匹配范围 ${config.matchScope}`,
-    `监控版块 ${categories}`,
-    `规则 ${ruleCount} 条`
-  ].join('，');
+    `监控版块 ${categories}`
+  ];
+  if (config.pushCategory) parts.push(`版块推送模式 ${config.pushCategory}`);
+  parts.push(`规则 ${ruleCount} 条`);
+  return parts.join('，');
 }
 
 export async function runApp({

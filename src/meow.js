@@ -27,6 +27,7 @@ function formatKeyword(reason = '') {
   if (reason.startsWith('keyword:')) return reason.slice('keyword:'.length);
   if (reason.startsWith('group:')) return reason.slice('group:'.length).split('+').join(' + ');
   if (reason.startsWith('regex:')) return reason.slice('regex:'.length);
+  if (reason.startsWith('category-push:')) return `版块推送：${categoryName(reason.slice('category-push:'.length))}`;
   return '未知';
 }
 

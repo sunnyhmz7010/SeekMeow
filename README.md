@@ -32,6 +32,7 @@ NodeSeek 上的 VPS 优惠、补货信息转瞬即逝，手动刷新既费时又
 
 ### 📋 前置要求
 
+- 一台能访问外网的 VPS 或 NAS（需能连接 `rss.nodeseek.com` 和 `api.chuckfang.com`，无需开放入站端口）
 - Docker（18.09+）
 - 一个 MeoW 昵称（`https://api.chuckfang.com/{你的昵称}/NodeSeek`）
 
@@ -128,6 +129,7 @@ docker run -d \
 | `BLOCK_KEYWORDS` | 否 | - | 英文逗号分隔，命中任意一个就不推送 |
 | `REGEX_PATTERNS` | 条件必填 | `[]` | 正则表达式列表，命中任意一个即推送，如 `["年付\\s*\\d+","香港|日本"]` |
 | `CATEGORIES` | 否 | `all` | `all`（所有版块）或用英文逗号分隔的版块标识 |
+| `PUSH_CATEGORY` | 否 | - | `all` 或单个版块标识，设置后该版块所有帖子直接推送（不命中屏蔽词即可），无需再匹配关键词。设置此项后 `KEYWORDS` 等正向规则可不填 |
 | `PUSH_EXISTING` | 否 | `false` | 首次启动时是否也检查 RSS 中已有的帖子 |
 
 > `KEYWORDS`、`KEYWORD_GROUPS`、`REGEX_PATTERNS` 至少配置一种。
