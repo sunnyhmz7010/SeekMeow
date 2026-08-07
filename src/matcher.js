@@ -16,23 +16,26 @@ export function matchItem(item, config) {
   );
   if (blocked) return { matched: false, reason: `blocked:${blocked}` };
 
+  const reasons = [];
+
   if (config.pushCategory) {
     const hit = config.pushCategory === 'all' || config.pushCategory.has(item.category);
-    if (hit) return { matched: true, reason: `category-push:${item.category}` };
+    if (hit) reasons.push(`category-push:${item.category}`);
   }
 
   const keyword = config.keywords.filter((candidate) =>
     normalized.includes(candidate.toLowerCase())
   );
-  if (keyword.length) return { matched: true, reason: `keyword:${keyword.join(',')}` };
+  if (keyword.length) reasons.push(`keyword:${keyword.join(',')}`);
 
   const group = config.keywordGroups.filter((candidates) =>
     candidates.every((candidate) => normalized.includes(candidate.toLowerCase()))
   );
-  if (group.length) return { matched: true, reason: `group:${group.map((g) => g.join('+')).join(',')}` };
+  if (group.length) reasons.push(`group:${group.map((g) => g.join('+')).join(',')}`);
 
   const regex = config.regexPatterns.filter((pattern) => pattern.test(text));
-  if (regex.length) return { matched: true, reason: `regex:${regex.map((r) => r.source).join(',')}` };
+  if (regex.length) reasons.push(`regex:${regex.map((r) => r.source).join(',')}`);
 
+  if (reasons.length) return { matched: true, reason: reasons.join('|') };
   return { matched: false, reason: 'no-match' };
 }
