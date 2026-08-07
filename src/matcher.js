@@ -21,18 +21,18 @@ export function matchItem(item, config) {
     if (hit) return { matched: true, reason: `category-push:${item.category}` };
   }
 
-  const keyword = config.keywords.find((candidate) =>
+  const keyword = config.keywords.filter((candidate) =>
     normalized.includes(candidate.toLowerCase())
   );
-  if (keyword) return { matched: true, reason: `keyword:${keyword}` };
+  if (keyword.length) return { matched: true, reason: `keyword:${keyword.join(',')}` };
 
-  const group = config.keywordGroups.find((candidates) =>
+  const group = config.keywordGroups.filter((candidates) =>
     candidates.every((candidate) => normalized.includes(candidate.toLowerCase()))
   );
-  if (group) return { matched: true, reason: `group:${group.join('+')}` };
+  if (group.length) return { matched: true, reason: `group:${group.map((g) => g.join('+')).join(',')}` };
 
-  const regex = config.regexPatterns.find((pattern) => pattern.test(text));
-  if (regex) return { matched: true, reason: `regex:${regex.source}` };
+  const regex = config.regexPatterns.filter((pattern) => pattern.test(text));
+  if (regex.length) return { matched: true, reason: `regex:${regex.map((r) => r.source).join(',')}` };
 
   return { matched: false, reason: 'no-match' };
 }

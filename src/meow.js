@@ -24,19 +24,19 @@ function categoryName(slug) {
 }
 
 function formatKeyword(reason = '') {
-  if (reason.startsWith('keyword:')) return reason.slice('keyword:'.length);
-  if (reason.startsWith('group:')) return reason.slice('group:'.length).split('+').join(' + ');
-  if (reason.startsWith('regex:')) return reason.slice('regex:'.length);
-  if (reason.startsWith('category-push:')) return `版块匹配：${categoryName(reason.slice('category-push:'.length))}`;
+  if (reason.startsWith('keyword:')) return `关键词（${reason.slice('keyword:'.length)}）`;
+  if (reason.startsWith('group:')) return `组合词（${reason.slice('group:'.length)}）`;
+  if (reason.startsWith('regex:')) return `正则（${reason.slice('regex:'.length)}）`;
+  if (reason.startsWith('category-push:')) return `版块匹配（${categoryName(reason.slice('category-push:'.length))}）`;
   return '未知';
 }
 
 export function formatReason(reason = '') {
-  if (reason.startsWith('keyword:')) return `关键词：${reason.slice('keyword:'.length)}`;
-  if (reason.startsWith('group:')) return `组合词：${reason.slice('group:'.length).split('+').join(' + ')}`;
-  if (reason.startsWith('regex:')) return `正则：${reason.slice('regex:'.length)}`;
-  if (reason.startsWith('category-push:')) return `版块匹配：${categoryName(reason.slice('category-push:'.length))}`;
-  if (reason.startsWith('blocked:')) return `屏蔽词：${reason.slice('blocked:'.length)}`;
+  if (reason.startsWith('keyword:')) return `命中规则：关键词（${reason.slice('keyword:'.length)}）`;
+  if (reason.startsWith('group:')) return `命中规则：组合词（${reason.slice('group:'.length)}）`;
+  if (reason.startsWith('regex:')) return `命中规则：正则（${reason.slice('regex:'.length)}）`;
+  if (reason.startsWith('category-push:')) return `命中规则：版块匹配（${categoryName(reason.slice('category-push:'.length))}）`;
+  if (reason.startsWith('blocked:')) return `命中规则：屏蔽词（${reason.slice('blocked:'.length)}）`;
   if (reason === 'category') return '版块过滤';
   if (reason === 'no-match') return '未命中';
   return reason;
@@ -65,7 +65,7 @@ export function formatMessage(item, match = {}) {
   return [
     `📌 版块：${categoryName(item.category)}`,
     `👤 作者：${item.creator || '未知'}`,
-    `🎯 关键词：${formatKeyword(match.reason)}`,
+    `🎯 命中规则：${formatKeyword(match.reason)}`,
     `🕒 发布时间：${formatChineseTime(item.pubDate)}`,
     `📝 摘要：${item.summary || '（无摘要）'}`
   ].join('\n');
