@@ -113,6 +113,24 @@ test('MeoW 自检推送使用固定标题、链接和图标', async () => {
   });
 });
 
+test('MeoW 自检推送在 RSS 异常时不声明 RSS 正常', async () => {
+  let body;
+  const fetchImpl = async (url, options) => {
+    body = JSON.parse(options.body);
+    return new Response(JSON.stringify({ status: 200, message: '推送成功' }), { status: 200 });
+  };
+  const client = createMeowClient({ nickname: 'tester', fetchImpl });
+
+  await client.pushHealthCheck({ rssOk: false });
+
+  assert.deepEqual(body, {
+    title: 'SeekMeow 自检',
+    msg: 'SeekMeow 已启动，MeoW 连接正常；RSS 连接异常，请检查网络或 NodeSeek RSS 服务。',
+    url: 'https://www.nodeseek.com/',
+    imgUrl: 'https://nodeseek.cc/uploads/default/optimized/1X/47c7a8a16553966c7b7b52b85dda45bbceb42d1b_2_512x512.png'
+  });
+});
+
 test('MeoW HTTP、JSON 和业务失败均抛错', async () => {
   const cases = [
     async () => new Response('error', { status: 503 }),

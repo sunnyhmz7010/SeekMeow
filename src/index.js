@@ -55,18 +55,21 @@ export async function runApp({
 
   const pusher = pusherFactory(config);
 
+  let startupRssOk = true;
   try {
     await fetchItems();
     logger.info('自检 RSS 连接正常');
   } catch (error) {
+    startupRssOk = false;
     logger.warn(`自检 RSS 连接失败：${error.message}`);
   }
 
   try {
-    await pusher.pushHealthCheck();
+    await pusher.pushHealthCheck({ rssOk: startupRssOk });
     logger.info('自检 MeoW 推送正常');
   } catch (error) {
     logger.error(`自检 MeoW 推送失败，${error.message}`);
+    throw error;
   }
 
   const controller = new AbortController();
@@ -75,14 +78,16 @@ export async function runApp({
     const startupTime = Date.now();
     healthCheckTimer = setInterval(async () => {
       if (Date.now() - startupTime < 300000) return;
+      let rssOk = true;
       try {
         await fetchItems();
         logger.info('自检 RSS 连接正常');
       } catch (error) {
-    logger.warn(`自检 RSS 连接失败，${error.message}`);
+        rssOk = false;
+        logger.warn(`自检 RSS 连接失败，${error.message}`);
       }
       try {
-        await pusher.pushHealthCheck();
+        await pusher.pushHealthCheck({ rssOk });
         logger.info('自检 MeoW 推送正常');
       } catch (error) {
         logger.error(`自检 MeoW 推送失败，${error.message}`);

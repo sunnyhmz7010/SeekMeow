@@ -53,3 +53,60 @@ test('启动时自检 RSS 连接并推送自检通知', async () => {
   assert.equal(logs[2], '自检 MeoW 推送正常');
   assert.equal(logs[3], '监控已启动');
 });
+
+test('启动自检 RSS 失败时推送降级自检通知', async () => {
+  const events = [];
+  const state = { async load() { return true; } };
+  const monitor = {
+    async initialize() {},
+    async run() {}
+  };
+  const pusher = {
+    async pushHealthCheck(options) { events.push(options); }
+  };
+
+  await runApp({
+    env: {
+      MEOW_NICKNAME: 'tester',
+      KEYWORDS: 'VPS'
+    },
+    stateFactory: () => state,
+    monitorFactory: () => monitor,
+    pusherFactory: () => pusher,
+    fetchItems: async () => { throw new Error('rss down'); },
+    registerSignals: false,
+    logger: {
+      info() {},
+      warn() {},
+      error() {}
+    }
+  });
+
+  assert.deepEqual(events, [{ rssOk: false }]);
+});
+
+test('启动自检 MeoW 推送失败时拒绝启动', async () => {
+  const monitor = {
+    async initialize() { throw new Error('monitor should not start'); },
+    async run() {}
+  };
+  const pusher = {
+    async pushHealthCheck() { throw new Error('meow down'); }
+  };
+
+  await assert.rejects(() => runApp({
+    env: {
+      MEOW_NICKNAME: 'tester',
+      KEYWORDS: 'VPS'
+    },
+    monitorFactory: () => monitor,
+    pusherFactory: () => pusher,
+    fetchItems: async () => [],
+    registerSignals: false,
+    logger: {
+      info() {},
+      warn() {},
+      error() {}
+    }
+  }), /meow down/);
+});

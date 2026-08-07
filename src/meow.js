@@ -111,10 +111,12 @@ export function createMeowClient({
         url: item.link
       });
     },
-    async pushHealthCheck() {
+    async pushHealthCheck({ rssOk = true } = {}) {
       await post({
         title: 'SeekMeow 自检',
-        msg: 'SeekMeow 已启动，RSS 与 MeoW 连接正常。',
+        msg: rssOk
+          ? 'SeekMeow 已启动，RSS 与 MeoW 连接正常。'
+          : 'SeekMeow 已启动，MeoW 连接正常；RSS 连接异常，请检查网络或 NodeSeek RSS 服务。',
         url: NODESEEK_HOME_URL
       });
     },
