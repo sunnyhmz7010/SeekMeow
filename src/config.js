@@ -101,10 +101,12 @@ export function parseConfig(env = process.env) {
   if (pushCategoryValue) {
     if (pushCategoryValue === 'all') {
       pushCategory = 'all';
-    } else if (CATEGORY_SLUG_SET.has(pushCategoryValue)) {
-      pushCategory = pushCategoryValue;
     } else {
-      throw new Error('PUSH_CATEGORY 必须是 all 或有效的版块标识');
+      const slugs = splitCsv(pushCategoryValue);
+      if (slugs.length === 0 || slugs.some((slug) => !CATEGORY_SLUG_SET.has(slug))) {
+        throw new Error('PUSH_CATEGORY 必须是 all 或英文逗号分隔的有效版块标识');
+      }
+      pushCategory = new Set(slugs);
     }
   }
 

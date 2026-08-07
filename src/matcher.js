@@ -17,9 +17,8 @@ export function matchItem(item, config) {
   if (blocked) return { matched: false, reason: `blocked:${blocked}` };
 
   if (config.pushCategory) {
-    if (config.pushCategory === 'all' || config.pushCategory === item.category) {
-      return { matched: true, reason: `category-push:${item.category}` };
-    }
+    const hit = config.pushCategory === 'all' || config.pushCategory.has(item.category);
+    if (hit) return { matched: true, reason: `category-push:${item.category}` };
     return { matched: false, reason: 'category-mismatch' };
   }
 

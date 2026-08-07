@@ -26,7 +26,10 @@ export function describeConfig(config) {
     `匹配范围 ${config.matchScope}`,
     `监控版块 ${categories}`
   ];
-  if (config.pushCategory) parts.push(`版块推送模式 ${config.pushCategory}`);
+  if (config.pushCategory) {
+    const label = config.pushCategory === 'all' ? 'all' : [...config.pushCategory].join(',');
+    parts.push(`版块推送模式 ${label}`);
+  }
   parts.push(`规则 ${ruleCount} 条`);
   return parts.join('，');
 }

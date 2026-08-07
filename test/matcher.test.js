@@ -68,7 +68,7 @@ test('版块不匹配时直接排除', () => {
 
 test('PUSH_CATEGORY 命中时跳过关键词直接推送', () => {
   assert.deepEqual(
-    matchItem(item, config({ pushCategory: 'trade' })),
+    matchItem(item, config({ pushCategory: new Set(['trade']) })),
     { matched: true, reason: 'category-push:trade' }
   );
   assert.deepEqual(
@@ -76,14 +76,18 @@ test('PUSH_CATEGORY 命中时跳过关键词直接推送', () => {
     { matched: true, reason: 'category-push:trade' }
   );
   assert.deepEqual(
-    matchItem(item, config({ pushCategory: 'daily' })),
+    matchItem(item, config({ pushCategory: new Set(['trade', 'daily']) })),
+    { matched: true, reason: 'category-push:trade' }
+  );
+  assert.deepEqual(
+    matchItem(item, config({ pushCategory: new Set(['daily']) })),
     { matched: false, reason: 'category-mismatch' }
   );
 });
 
 test('PUSH_CATEGORY 模式下屏蔽词仍然优先', () => {
   assert.deepEqual(
-    matchItem(item, config({ pushCategory: 'trade', blockedKeywords: ['VPS'] })),
+    matchItem(item, config({ pushCategory: new Set(['trade']), blockedKeywords: ['VPS'] })),
     { matched: false, reason: 'blocked:VPS' }
   );
 });
