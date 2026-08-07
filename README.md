@@ -97,6 +97,13 @@ docker run -d \
   --restart unless-stopped \
   -e MEOW_NICKNAME="你的昵称" \
   -e KEYWORDS="VPS,优惠,补货" \
+  -e KEYWORD_GROUPS='[["香港","VPS"],["日本","线路"]]' \
+  -e BLOCK_KEYWORDS="求购,已收" \
+  -e REGEX_PATTERNS='["年付\\s*\\d+","香港|日本"]' \
+  -e MATCH_SCOPE=all \
+  -e CATEGORIES=all \
+  -e CHECK_INTERVAL_SECONDS=5 \
+  -e PUSH_EXISTING=false \
   seekmeow
 ```
 
