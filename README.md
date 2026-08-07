@@ -129,15 +129,15 @@ docker run -d \
 | --- | --- | --- | --- |
 | `MEOW_NICKNAME` | 是 | - | MeoW 用户昵称，不能包含 `/` |
 | `CHECK_INTERVAL_SECONDS` | 否 | `5` | 检查新帖的间隔（秒），范围 1-2147483 |
-| `MATCH_SCOPE` | 否 | `all` | `title` 仅匹配标题，`summary` 仅匹配摘要，`all` 同时匹配。版块匹配不受此项限制 |
-| `CATEGORIES` | 否 | `all` | `all` 或英文逗号分隔的版块标识，限制只监控指定版块。`PUSH_CATEGORY` 的匹配范围同样受此过滤 |
-| `KEYWORDS` | 条件必填 | - | 英文逗号分隔，命中任意一个即推送 |
-| `KEYWORD_GROUPS` | 条件必填 | `[]` | JSON 二维数组如 `[["词A","词B"]]`，同组内全部命中才推送，不同组命中任一组即推送 |
-| `REGEX_PATTERNS` | 条件必填 | `[]` | JSON 字符串数组如 `["年付\\s*\\d+"]`，命中任意一个即推送，固定 `iu` 标志 |
-| `PUSH_CATEGORY` | 条件必填 | - | `all` 或英文逗号分隔的版块标识如 `trade,daily`，命中指定版块即推送，无需关键词。与关键词/组合词/正则的匹配结果取并集 |
-| `BLOCK_KEYWORDS` | 否 | - | 英文逗号分隔，命中任意一个就不推送 |
+| `MATCH_SCOPE` | 否 | `all` | 匹配范围：`title` 仅匹配标题，`summary` 仅匹配 RSS 摘要，`all` 同时匹配两者。仅对关键词/组合词/正则生效，版块匹配不受此限制 |
+| `CATEGORIES` | 否 | `all` | 全局版块过滤：`all` 不过滤，或用英文逗号分隔版块标识仅监控指定版块。`PUSH_CATEGORY` 的匹配也受此过滤限制 |
+| `KEYWORDS` | 条件必填 | - | 普通关键词，英文逗号分隔。命中标题或摘要中任意一个即推送 |
+| `KEYWORD_GROUPS` | 条件必填 | `[]` | 组合关键词，JSON 二维数组格式如 `[["词A","词B"]]`。同组内所有词同时命中才推送，不同组命中任一组即推送 |
+| `REGEX_PATTERNS` | 条件必填 | `[]` | 正则表达式，JSON 字符串数组格式如 `["年付\\s*\\d+"]`。命中任意一个即推送，固定使用 `iu` 标志（不区分大小写、支持 Unicode） |
+| `PUSH_CATEGORY` | 条件必填 | - | 版块匹配：设为 `all` 或英文逗号分隔的版块标识如 `trade,daily`，命中指定版块即推送，无需再匹配关键词。与关键词/组合词/正则的匹配结果取并集 |
+| `BLOCK_KEYWORDS` | 否 | - | 屏蔽词，英文逗号分隔。命中任意一个即跳过推送，在所有匹配规则中均生效 |
 | `PUSH_EXISTING` | 否 | `false` | 首次启动时是否还对 RSS 中已有的帖子执行匹配和推送 |
-| `HEALTH_CHECK_MINUTES` | 否 | `60` | 定时自检间隔（分钟），范围 0-1440，设为 0 关闭。自检时验证 RSS 与 MeoW 连接并推送通知 |
+| `HEALTH_CHECK_MINUTES` | 否 | `60` | 定时自检间隔（分钟），范围 0-1440。设为 0 关闭自检。自检时会验证 RSS 与 MeoW 连接并推送一条通知 |
 
 > `KEYWORDS`、`KEYWORD_GROUPS`、`REGEX_PATTERNS`、`PUSH_CATEGORY` 四项至少配置一种。
 
