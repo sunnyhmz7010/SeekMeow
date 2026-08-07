@@ -132,14 +132,14 @@ export function parseConfig(env = process.env) {
   return {
     meowNickname,
     checkIntervalMs: intervalMs,
-    healthCheckMs,
     matchScope,
+    categories,
     keywords,
     keywordGroups,
-    blockedKeywords,
     regexPatterns,
-    categories,
     pushCategory,
-    pushExisting: parseBoolean(env.PUSH_EXISTING, 'PUSH_EXISTING', false)
+    blockedKeywords,
+    pushExisting: parseBoolean(env.PUSH_EXISTING, 'PUSH_EXISTING', false),
+    healthCheckMs
   };
 }

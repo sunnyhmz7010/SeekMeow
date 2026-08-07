@@ -50,12 +50,12 @@ services:
       - MEOW_NICKNAME=你的昵称
       - CHECK_INTERVAL_SECONDS=5
       - MATCH_SCOPE=all
+      - CATEGORIES=all
       - KEYWORDS=VPS,优惠,补货
       - KEYWORD_GROUPS=[["香港","VPS"],["日本","线路"]]
       - REGEX_PATTERNS=["年付\\s*\\d+","香港|日本"]
       - PUSH_CATEGORY=trade
       - BLOCK_KEYWORDS=求购,已收
-      - CATEGORIES=all
       - PUSH_EXISTING=false
       - HEALTH_CHECK_MINUTES=60
 ```
@@ -83,12 +83,12 @@ docker run -d \
   -e MEOW_NICKNAME="你的昵称" \
   -e CHECK_INTERVAL_SECONDS=5 \
   -e MATCH_SCOPE=all \
+  -e CATEGORIES=all \
   -e KEYWORDS="VPS,优惠,补货" \
   -e KEYWORD_GROUPS='[["香港","VPS"],["日本","线路"]]' \
   -e REGEX_PATTERNS='["年付\\s*\\d+","香港|日本"]' \
   -e PUSH_CATEGORY=trade \
   -e BLOCK_KEYWORDS="求购,已收" \
-  -e CATEGORIES=all \
   -e PUSH_EXISTING=false \
   -e HEALTH_CHECK_MINUTES=60 \
   ghcr.io/sunnyhmz7010/seekmeow:latest
@@ -108,12 +108,12 @@ docker run -d \
   -e MEOW_NICKNAME="你的昵称" \
   -e CHECK_INTERVAL_SECONDS=5 \
   -e MATCH_SCOPE=all \
+  -e CATEGORIES=all \
   -e KEYWORDS="VPS,优惠,补货" \
   -e KEYWORD_GROUPS='[["香港","VPS"],["日本","线路"]]' \
   -e REGEX_PATTERNS='["年付\\s*\\d+","香港|日本"]' \
   -e PUSH_CATEGORY=trade \
   -e BLOCK_KEYWORDS="求购,已收" \
-  -e CATEGORIES=all \
   -e PUSH_EXISTING=false \
   -e HEALTH_CHECK_MINUTES=60 \
   seekmeow
@@ -130,12 +130,12 @@ docker run -d \
 | `MEOW_NICKNAME` | 是 | - | MeoW 昵称，不能包含 `/` |
 | `CHECK_INTERVAL_SECONDS` | 否 | `5` | 检查新帖的间隔（秒），范围 1-2147483 |
 | `MATCH_SCOPE` | 否 | `all` | `title`（仅标题）、`summary`（仅摘要）、`all`（同时匹配） |
+| `CATEGORIES` | 否 | `all` | `all`（所有版块）或用英文逗号分隔的版块标识。作为全局过滤，`PUSH_CATEGORY` 的匹配范围也受此限制 |
 | `KEYWORDS` | 条件必填 | - | 英文逗号分隔，命中任意一个即推送 |
 | `KEYWORD_GROUPS` | 条件必填 | `[]` | 多组关键词，同组内的词必须全部命中才推送，如 `[["香港","VPS"],["日本","线路"]]` |
 | `REGEX_PATTERNS` | 条件必填 | `[]` | 正则表达式列表，命中任意一个即推送，如 `["年付\\s*\\d+","香港|日本"]` |
 | `PUSH_CATEGORY` | 条件必填 | - | 版块匹配：命中指定版块即推送。设为 `all` 匹配所有版块，或设为英文逗号分隔的版块标识如 `trade,daily`。可与关键词等规则同时使用，命中任一即推送 |
 | `BLOCK_KEYWORDS` | 否 | - | 英文逗号分隔，命中任意一个就不推送，所有模式下均生效 |
-| `CATEGORIES` | 否 | `all` | `all`（所有版块）或用英文逗号分隔的版块标识。作为全局过滤，`PUSH_CATEGORY` 的匹配范围也受此限制 |
 | `PUSH_EXISTING` | 否 | `false` | 首次启动时是否也检查 RSS 中已有的帖子 |
 | `HEALTH_CHECK_MINUTES` | 否 | `60` | 定时自检间隔（分钟），范围 0-1440。设为 0 关闭自检。自检时会测试 RSS 与 MeoW 连接并推送一条通知 |
 

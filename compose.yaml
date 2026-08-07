@@ -7,11 +7,11 @@ services:
       - MEOW_NICKNAME=你的昵称
       - CHECK_INTERVAL_SECONDS=5
       - MATCH_SCOPE=all
+      - CATEGORIES=all
       - KEYWORDS=VPS,优惠,补货
       - KEYWORD_GROUPS=[["香港","VPS"],["日本","线路"]]
       - REGEX_PATTERNS=["年付\\s*\\d+","香港|日本"]
       - PUSH_CATEGORY=trade
       - BLOCK_KEYWORDS=求购,已收
-      - CATEGORIES=all
       - PUSH_EXISTING=false
       - HEALTH_CHECK_MINUTES=60
