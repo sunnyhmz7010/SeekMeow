@@ -10,7 +10,7 @@
 
 ---
 
-## ✨ 为什么做这个应用
+## ✨ 为什么做这个项目
 
 NodeSeek 上 VPS 优惠、补货等情报稍纵即逝，人工盯版块既费时又容易错过。SeekMeow 直接订阅 NodeSeek 官方 RSS，通过关键词、组合词、正则等规则自动筛选帖子，并推送到 MeoW。整个过程无需 NodeSeek 账号、Cookie 或浏览器，也不需要任何端口映射，一个容器即可长期稳定运行。
 
@@ -196,11 +196,11 @@ npm test
 
 ## 🔐 安全报告
 
-如果发现安全问题，请不要公开披露。请参考 [SECURITY.md](./SECURITY.md) 提交报告。
+如果发现安全问题，请不要公开披露细节。请优先参考仓库中的 [SECURITY.md](./SECURITY.md) 提交安全报告。
 
 ## 📄 许可证
 
-[GPL-3.0](./LICENSE)
+本项目基于 [GPL-3.0](./LICENSE) 开源。
 
 <div align="center">
   <sub>Built with ❤️ by Sunny</sub>
