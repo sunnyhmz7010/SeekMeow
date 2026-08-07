@@ -24,10 +24,10 @@ function categoryName(slug) {
 }
 
 function formatSingleKeyword(reason = '') {
-  if (reason.startsWith('keyword:')) return `关键词（${reason.slice('keyword:'.length)}）`;
-  if (reason.startsWith('group:')) return `组合词（${reason.slice('group:'.length)}）`;
-  if (reason.startsWith('regex:')) return `正则（${reason.slice('regex:'.length)}）`;
-  if (reason.startsWith('category-push:')) return `版块匹配（${categoryName(reason.slice('category-push:'.length))}）`;
+  if (reason.startsWith('keyword:')) return reason.slice('keyword:'.length);
+  if (reason.startsWith('group:')) return reason.slice('group:'.length);
+  if (reason.startsWith('regex:')) return reason.slice('regex:'.length);
+  if (reason.startsWith('category-push:')) return `${categoryName(reason.slice('category-push:'.length))}（版块匹配）`;
   return reason;
 }
 
@@ -40,7 +40,7 @@ function formatSingleReason(reason = '') {
 }
 
 function formatKeyword(reason = '') {
-  return reason.split('|').filter(Boolean).map(formatSingleKeyword).join(' | ');
+  return reason.split('|').filter(Boolean).map(formatSingleKeyword).join(' ');
 }
 
 export function formatReason(reason = '') {
