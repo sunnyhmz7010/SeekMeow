@@ -106,6 +106,13 @@ export function createMeowClient({
         msg: 'SeekMeow 已启动，NodeSeek RSS 关键词监控正在运行。',
         url: NODESEEK_HOME_URL
       });
+    },
+    async pushHealthCheck() {
+      await post({
+        title: 'SeekMeow 自检',
+        msg: `SeekMeow 自检通过，RSS 与 MeoW 连接正常。${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}`,
+        url: NODESEEK_HOME_URL
+      });
     }
   };
 }

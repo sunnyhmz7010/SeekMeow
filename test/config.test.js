@@ -16,6 +16,7 @@ test('配置使用约定默认值', () => {
   assert.equal(config.matchScope, 'all');
   assert.equal(config.categories, null);
   assert.equal(config.pushExisting, false);
+  assert.equal(config.healthCheckMs, 3600000);
 });
 
 test('解析普通词、组合词、屏蔽词、正则和多版块', () => {
@@ -79,4 +80,12 @@ test('PUSH_CATEGORY 解析与校验', () => {
   assert.deepEqual([...parseConfig({ ...requiredEnv, PUSH_CATEGORY: 'trade,daily' }).pushCategory], ['trade', 'daily']);
   assert.throws(() => parseConfig({ ...requiredEnv, PUSH_CATEGORY: 'unknown' }), /PUSH_CATEGORY/);
   assert.throws(() => parseConfig({ ...requiredEnv, PUSH_CATEGORY: 'trade,unknown' }), /PUSH_CATEGORY/);
+});
+
+test('HEALTH_CHECK_MINUTES 默认值、禁用与范围校验', () => {
+  assert.equal(parseConfig(requiredEnv).healthCheckMs, 3600000);
+  assert.equal(parseConfig({ ...requiredEnv, HEALTH_CHECK_MINUTES: '0' }).healthCheckMs, null);
+  assert.equal(parseConfig({ ...requiredEnv, HEALTH_CHECK_MINUTES: '10' }).healthCheckMs, 600000);
+  assert.throws(() => parseConfig({ ...requiredEnv, HEALTH_CHECK_MINUTES: '1441' }), /HEALTH_CHECK_MINUTES/);
+  assert.throws(() => parseConfig({ ...requiredEnv, HEALTH_CHECK_MINUTES: '-1' }), /HEALTH_CHECK_MINUTES/);
 });

@@ -57,6 +57,7 @@ services:
       - BLOCK_KEYWORDS=求购,已收
       - CATEGORIES=all
       - PUSH_EXISTING=false
+      - HEALTH_CHECK_MINUTES=60
 ```
 
 然后启动：
@@ -89,6 +90,7 @@ docker run -d \
   -e BLOCK_KEYWORDS="求购,已收" \
   -e CATEGORIES=all \
   -e PUSH_EXISTING=false \
+  -e HEALTH_CHECK_MINUTES=60 \
   ghcr.io/sunnyhmz7010/seekmeow:latest
 ```
 
@@ -113,6 +115,7 @@ docker run -d \
   -e BLOCK_KEYWORDS="求购,已收" \
   -e CATEGORIES=all \
   -e PUSH_EXISTING=false \
+  -e HEALTH_CHECK_MINUTES=60 \
   seekmeow
 ```
 
@@ -134,6 +137,7 @@ docker run -d \
 | `BLOCK_KEYWORDS` | 否 | - | 英文逗号分隔，命中任意一个就不推送，所有模式下均生效 |
 | `CATEGORIES` | 否 | `all` | `all`（所有版块）或用英文逗号分隔的版块标识 |
 | `PUSH_EXISTING` | 否 | `false` | 首次启动时是否也检查 RSS 中已有的帖子 |
+| `HEALTH_CHECK_MINUTES` | 否 | `60` | 定时自检间隔（分钟），范围 0-1440。设为 0 关闭自检。自检时会测试 RSS 与 MeoW 连接并推送一条通知 |
 
 > `KEYWORDS`、`KEYWORD_GROUPS`、`REGEX_PATTERNS`、`PUSH_CATEGORY` 四项至少配置一种。
 

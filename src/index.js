@@ -40,6 +40,7 @@ export async function runApp({
   stateFactory = () => new StateStore('/app/data/state.json', 1000),
   pusherFactory = (config) => createMeowClient({ nickname: config.meowNickname }),
   monitorFactory = (options) => new Monitor(options),
+  fetchItems = () => fetchFeed(),
   registerSignals = true
 } = {}) {
   const config = parseConfig(env);
@@ -49,10 +50,32 @@ export async function runApp({
   await pusher.pushStartupTest();
   logger.info('MeoW 启动测试推送成功');
 
+  try {
+    await fetchItems();
+    logger.info('RSS 连接正常');
+  } catch (error) {
+    logger.warn(`RSS 连接检测失败: ${error.message}`);
+  }
+
   const controller = new AbortController();
+  let healthCheckTimer;
+  if (config.healthCheckMs) {
+    healthCheckTimer = setInterval(async () => {
+      try {
+        await fetchItems();
+        logger.info('自检 RSS 连接正常');
+        await pusher.pushHealthCheck();
+        logger.info('自检 MeoW 推送正常');
+      } catch (error) {
+        logger.error(`自检失败: ${error.message}`);
+      }
+    }, config.healthCheckMs);
+  }
+
   if (registerSignals) {
     const stop = (signal) => {
       logger.info(`收到 ${signal}，将在当前操作完成后退出`);
+      if (healthCheckTimer) clearInterval(healthCheckTimer);
       controller.abort();
     };
     process.once('SIGTERM', () => stop('SIGTERM'));
@@ -61,7 +84,7 @@ export async function runApp({
 
   const monitor = monitorFactory({
     config,
-    fetchItems: () => fetchFeed(),
+    fetchItems,
     matcher: matchItem,
     pusher,
     state: stateFactory(),
@@ -70,7 +93,11 @@ export async function runApp({
 
   await monitor.initialize();
   logger.info('监控已启动');
-  await monitor.run(controller.signal);
+  try {
+    await monitor.run(controller.signal);
+  } finally {
+    if (healthCheckTimer) clearInterval(healthCheckTimer);
+  }
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

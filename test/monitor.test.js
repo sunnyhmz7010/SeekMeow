@@ -113,6 +113,22 @@ test('MeoW 启动测试推送使用固定标题、链接和图标', async () => 
   });
 });
 
+test('MeoW 自检推送使用固定标题和链接', async () => {
+  let body;
+  const fetchImpl = async (url, options) => {
+    body = JSON.parse(options.body);
+    return new Response(JSON.stringify({ status: 200, message: '推送成功' }), { status: 200 });
+  };
+  const client = createMeowClient({ nickname: 'tester', fetchImpl });
+
+  await client.pushHealthCheck();
+
+  assert.equal(body.title, 'SeekMeow 自检');
+  assert.ok(body.msg.includes('SeekMeow 自检通过'));
+  assert.equal(body.url, 'https://www.nodeseek.com/');
+  assert.ok(body.imgUrl);
+});
+
 test('MeoW HTTP、JSON 和业务失败均抛错', async () => {
   const cases = [
     async () => new Response('error', { status: 503 }),

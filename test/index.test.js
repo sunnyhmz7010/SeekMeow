@@ -35,6 +35,8 @@ test('启动时先记录配置并发送 MeoW 测试推送', async () => {
     stateFactory: () => state,
     monitorFactory: () => monitor,
     pusherFactory: () => pusher,
+    fetchItems: async () => [],
+    registerSignals: false,
     logger: {
       info(message) { logs.push(message); },
       warn() {},
@@ -45,5 +47,6 @@ test('启动时先记录配置并发送 MeoW 测试推送', async () => {
   assert.deepEqual(events, ['test-push', 'monitor', 'run']);
   assert.equal(logs[0], '启动配置：MeoW 昵称 tester，轮询间隔 5 秒，匹配范围 all，监控版块 all，规则 1 条');
   assert.equal(logs[1], 'MeoW 启动测试推送成功');
-  assert.equal(logs[2], '监控已启动');
+  assert.equal(logs[2], 'RSS 连接正常');
+  assert.equal(logs[3], '监控已启动');
 });

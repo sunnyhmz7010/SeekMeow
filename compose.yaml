@@ -14,3 +14,4 @@ services:
       - BLOCK_KEYWORDS=求购,已收
       - CATEGORIES=all
       - PUSH_EXISTING=false
+      - HEALTH_CHECK_MINUTES=60
