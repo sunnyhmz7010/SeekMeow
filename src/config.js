@@ -71,7 +71,7 @@ function parseBoolean(value, name, fallback) {
 
 export function parseConfig(env = process.env) {
   const meowNickname = env.MEOW_NICKNAME?.trim();
-  if (!meowNickname) throw new Error('MEOW_NICKNAME 不能为空');
+  if (!meowNickname) throw new Error('MEOW_NICKNAME 不能为空，请设置 MeoW 用户昵称');
   if (meowNickname.includes('/')) throw new Error('MEOW_NICKNAME 不能包含斜杠');
 
   const intervalSeconds = Number(env.CHECK_INTERVAL_SECONDS ?? '5');

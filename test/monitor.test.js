@@ -67,14 +67,49 @@ test('构造 MeoW 纯文本消息并 POST JSON', async () => {
   };
   const client = createMeowClient({ nickname: '测试 用户', fetchImpl });
 
-  await client.push(sampleItem);
+  await client.push(sampleItem, { reason: 'keyword:VPS' });
 
   assert.equal(request.url, 'https://api.chuckfang.com/%E6%B5%8B%E8%AF%95%20%E7%94%A8%E6%88%B7/NodeSeek?msgType=text');
   assert.equal(request.options.method, 'POST');
   assert.deepEqual(JSON.parse(request.options.body), {
     title: sampleItem.title,
-    msg: formatMessage(sampleItem),
-    url: sampleItem.link
+    msg: formatMessage(sampleItem, { reason: 'keyword:VPS' }),
+    url: sampleItem.link,
+    imgUrl: 'https://nodeseek.cc/uploads/default/optimized/1X/47c7a8a16553966c7b7b52b85dda45bbceb42d1b_2_512x512.png'
+  });
+});
+
+test('MeoW 消息正文使用中文版块、关键词和中文时间，摘要完整输出', () => {
+  const message = formatMessage({
+    ...sampleItem,
+    summary: '第一行摘要\n第二行摘要，不截断',
+    pubDate: 'Thu, 06 Aug 2026 13:09:07 GMT'
+  }, { reason: 'group:香港+VPS' });
+
+  assert.equal(message, [
+    '📌 版块：交易',
+    '👤 作者：alice',
+    '🎯 关键词：香港 + VPS',
+    '🕒 发布时间：2026年8月6日 21:09:07',
+    '📝 摘要：第一行摘要\n第二行摘要，不截断'
+  ].join('\n'));
+});
+
+test('MeoW 启动测试推送使用固定标题、链接和图标', async () => {
+  let body;
+  const fetchImpl = async (url, options) => {
+    body = JSON.parse(options.body);
+    return new Response(JSON.stringify({ status: 200, message: '推送成功' }), { status: 200 });
+  };
+  const client = createMeowClient({ nickname: 'tester', fetchImpl });
+
+  await client.pushStartupTest();
+
+  assert.deepEqual(body, {
+    title: 'SeekMeow 启动测试',
+    msg: 'SeekMeow 已启动，NodeSeek RSS 关键词监控正在运行。',
+    url: 'https://www.nodeseek.com/',
+    imgUrl: 'https://nodeseek.cc/uploads/default/optimized/1X/47c7a8a16553966c7b7b52b85dda45bbceb42d1b_2_512x512.png'
   });
 });
 
@@ -169,17 +204,17 @@ test('按旧到新处理，未命中去重，推送失败下轮重试', async ()
     config: monitorConfig(),
     fetchItems: async () => [unmatched, failed, old],
     matcher: (item) => ({ matched: item.id !== '3', reason: item.id === '3' ? 'no-match' : 'keyword:VPS' }),
-    pusher: { async push(item) { attempts.push(item.id); if (item.id === '2' && failOnce) { failOnce = false; throw new Error('temporary'); } } },
+    pusher: { async push(item, match) { attempts.push([item.id, match.reason]); if (item.id === '2' && failOnce) { failOnce = false; throw new Error('temporary'); } } },
     state,
     logger: silentLogger
   });
 
   await monitor.initialize();
   await monitor.poll();
-  assert.deepEqual(attempts, ['1', '2']);
+  assert.deepEqual(attempts, [['1', 'keyword:VPS'], ['2', 'keyword:VPS']]);
   assert.deepEqual(state.values(), ['1', '3']);
   await monitor.poll();
-  assert.deepEqual(attempts, ['1', '2', '2']);
+  assert.deepEqual(attempts, [['1', 'keyword:VPS'], ['2', 'keyword:VPS'], ['2', 'keyword:VPS']]);
   assert.deepEqual(state.values(), ['1', '3', '2']);
 });
 

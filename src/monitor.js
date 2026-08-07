@@ -58,7 +58,7 @@ export class Monitor {
 
       this.logger.info(`命中帖子 ${item.id}: ${result.reason}`);
       try {
-        await this.pusher.push(item);
+        await this.pusher.push(item, result);
         const removed = this.state.removePending(item.id);
         changed = this.state.add(item.id) || removed || changed;
         this.logger.info(`推送成功 ${item.id}`);
