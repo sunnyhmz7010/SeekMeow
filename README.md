@@ -123,34 +123,32 @@ docker run -d \
 
 ## 📖 使用说明
 
-### 环境变量
+### 📋 环境变量
 
 | 变量 | 必填 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `MEOW_NICKNAME` | 是 | - | MeoW 昵称，不能包含 `/` |
+| `MEOW_NICKNAME` | 是 | - | MeoW 用户昵称，不能包含 `/` |
 | `CHECK_INTERVAL_SECONDS` | 否 | `5` | 检查新帖的间隔（秒），范围 1-2147483 |
-| `MATCH_SCOPE` | 否 | `all` | `title`（仅标题）、`summary`（仅摘要）、`all`（同时匹配） |
-| `CATEGORIES` | 否 | `all` | `all`（所有版块）或用英文逗号分隔的版块标识。作为全局过滤，`PUSH_CATEGORY` 的匹配范围也受此限制 |
-| `KEYWORDS` | 条件必填 | - | 英文逗号分隔，命中任意一个即推送 |
-| `KEYWORD_GROUPS` | 条件必填 | `[]` | 多组关键词，同组内的词必须全部命中才推送，如 `[["香港","VPS"],["日本","线路"]]` |
-| `REGEX_PATTERNS` | 条件必填 | `[]` | 正则表达式列表，命中任意一个即推送，如 `["年付\\s*\\d+","香港|日本"]` |
-| `PUSH_CATEGORY` | 条件必填 | - | 版块匹配：命中指定版块即推送。设为 `all` 匹配所有版块，或设为英文逗号分隔的版块标识如 `trade,daily`。可与关键词等规则同时使用，命中任一即推送 |
-| `BLOCK_KEYWORDS` | 否 | - | 英文逗号分隔，命中任意一个就不推送，所有模式下均生效 |
-| `PUSH_EXISTING` | 否 | `false` | 首次启动时是否也检查 RSS 中已有的帖子 |
-| `HEALTH_CHECK_MINUTES` | 否 | `60` | 定时自检间隔（分钟），范围 0-1440。设为 0 关闭自检。自检时会测试 RSS 与 MeoW 连接并推送一条通知 |
+| `MATCH_SCOPE` | 否 | `all` | 匹配范围：`title` 仅匹配标题，`summary` 仅匹配 RSS 摘要，`all` 同时匹配两者。仅对关键词/组合词/正则生效，版块匹配不受此限制 |
+| `CATEGORIES` | 否 | `all` | 全局版块过滤：`all` 不过滤，或用英文逗号分隔版块标识仅监控指定版块。`PUSH_CATEGORY` 的匹配也受此过滤限制 |
+| `KEYWORDS` | 条件必填 | - | 普通关键词，英文逗号分隔。命中标题或摘要中任意一个即推送 |
+| `KEYWORD_GROUPS` | 条件必填 | `[]` | 组合关键词，JSON 二维数组格式如 `[["词A","词B"]]`。同组内所有词同时命中才推送，不同组命中任一组即推送 |
+| `REGEX_PATTERNS` | 条件必填 | `[]` | 正则表达式，JSON 字符串数组格式如 `["年付\\s*\\d+"]`。命中任意一个即推送，固定使用 `iu` 标志（不区分大小写、支持 Unicode） |
+| `PUSH_CATEGORY` | 条件必填 | - | 版块匹配：设为 `all` 或英文逗号分隔的版块标识如 `trade,daily`，命中指定版块即推送，无需再匹配关键词。与关键词/组合词/正则的匹配结果取并集 |
+| `BLOCK_KEYWORDS` | 否 | - | 屏蔽词，英文逗号分隔。命中任意一个即跳过推送，在所有匹配规则中均生效 |
+| `PUSH_EXISTING` | 否 | `false` | 首次启动时是否还对 RSS 中已有的帖子执行匹配和推送 |
+| `HEALTH_CHECK_MINUTES` | 否 | `60` | 定时自检间隔（分钟），范围 0-1440。设为 0 关闭自检。自检时会验证 RSS 与 MeoW 连接并推送一条通知 |
 
 > `KEYWORDS`、`KEYWORD_GROUPS`、`REGEX_PATTERNS`、`PUSH_CATEGORY` 四项至少配置一种。
 
 可选版块标识：
 `daily` `tech` `info` `review` `trade` `carpool` `promo` `life` `dev` `photo-share` `expose` `inner` `sandbox`
 
-### 匹配规则
+### 🎯 匹配规则
 
-屏蔽词优先，在所有模式下均生效。
+屏蔽词优先，在所有模式下均生效。未命中屏蔽词时，满足以下任一条件即推送：普通关键词任意命中、组合规则全词命中、正则命中，或属于 `PUSH_CATEGORY` 指定的版块。
 
-未命中屏蔽词时，满足以下任一条件即推送：普通关键词任意命中、组合规则全词命中、正则命中，或属于 `PUSH_CATEGORY` 指定的版块。
-
-### 日志与去重
+### 📜 日志与去重
 
 ```bash
 docker logs -f seekmeow
@@ -207,7 +205,7 @@ npm test
 
 ## 🔐 安全报告
 
-如果发现安全问题，请不要公开披露细节。请优先参考仓库中的 [SECURITY.md](./SECURITY.md) 提交安全报告。
+如果发现安全问题，请不要公开披露。请参考 [SECURITY.md](./SECURITY.md) 提交安全报告。
 
 ## 📄 许可证
 
