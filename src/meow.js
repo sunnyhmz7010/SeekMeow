@@ -117,6 +117,13 @@ export function createMeowClient({
         msg: 'SeekMeow 已启动，RSS 与 MeoW 连接正常。',
         url: NODESEEK_HOME_URL
       });
+    },
+    async pushError(message) {
+      await post({
+        title: 'SeekMeow 异常',
+        msg: message,
+        url: NODESEEK_HOME_URL
+      });
     }
   };
 }

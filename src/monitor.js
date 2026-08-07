@@ -79,6 +79,12 @@ export class Monitor {
         await this.poll();
       } catch (error) {
         this.logger.error(error.message);
+        try {
+          await this.pusher.pushError(error.message);
+          this.logger.info('RSS 异常通知推送成功');
+        } catch (pushError) {
+          this.logger.error(`RSS 异常通知推送失败，${pushError.message}`);
+        }
       }
       try {
         await delay(this.config.checkIntervalMs, undefined, { signal });
