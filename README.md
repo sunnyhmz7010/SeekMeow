@@ -48,15 +48,15 @@ services:
     restart: unless-stopped
     environment:
       - MEOW_NICKNAME=你的昵称
+      - CHECK_INTERVAL_SECONDS=5
+      - MATCH_SCOPE=all
       - KEYWORDS=VPS,优惠,补货
       - KEYWORD_GROUPS=[["香港","VPS"],["日本","线路"]]
-      - BLOCK_KEYWORDS=求购,已收
       - REGEX_PATTERNS=["年付\\s*\\d+","香港|日本"]
-      - MATCH_SCOPE=all
+      - PUSH_CATEGORY=trade
+      - BLOCK_KEYWORDS=求购,已收
       - CATEGORIES=all
-      - CHECK_INTERVAL_SECONDS=5
       - PUSH_EXISTING=false
-      # - PUSH_CATEGORY=trade
 ```
 
 然后启动：
@@ -80,15 +80,15 @@ docker run -d \
   --name seekmeow \
   --restart unless-stopped \
   -e MEOW_NICKNAME="你的昵称" \
+  -e CHECK_INTERVAL_SECONDS=5 \
+  -e MATCH_SCOPE=all \
   -e KEYWORDS="VPS,优惠,补货" \
   -e KEYWORD_GROUPS='[["香港","VPS"],["日本","线路"]]' \
-  -e BLOCK_KEYWORDS="求购,已收" \
   -e REGEX_PATTERNS='["年付\\s*\\d+","香港|日本"]' \
-  -e MATCH_SCOPE=all \
+  -e PUSH_CATEGORY=trade \
+  -e BLOCK_KEYWORDS="求购,已收" \
   -e CATEGORIES=all \
-  -e CHECK_INTERVAL_SECONDS=5 \
   -e PUSH_EXISTING=false \
-  # -e PUSH_CATEGORY=trade \
   ghcr.io/sunnyhmz7010/seekmeow:latest
 ```
 
@@ -104,15 +104,15 @@ docker run -d \
   --name seekmeow \
   --restart unless-stopped \
   -e MEOW_NICKNAME="你的昵称" \
+  -e CHECK_INTERVAL_SECONDS=5 \
+  -e MATCH_SCOPE=all \
   -e KEYWORDS="VPS,优惠,补货" \
   -e KEYWORD_GROUPS='[["香港","VPS"],["日本","线路"]]' \
-  -e BLOCK_KEYWORDS="求购,已收" \
   -e REGEX_PATTERNS='["年付\\s*\\d+","香港|日本"]' \
-  -e MATCH_SCOPE=all \
+  -e PUSH_CATEGORY=trade \
+  -e BLOCK_KEYWORDS="求购,已收" \
   -e CATEGORIES=all \
-  -e CHECK_INTERVAL_SECONDS=5 \
   -e PUSH_EXISTING=false \
-  # -e PUSH_CATEGORY=trade \
   seekmeow
 ```
 

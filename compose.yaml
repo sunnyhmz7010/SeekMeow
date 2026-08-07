@@ -5,12 +5,12 @@ services:
     restart: unless-stopped
     environment:
       - MEOW_NICKNAME=你的昵称
+      - CHECK_INTERVAL_SECONDS=5
+      - MATCH_SCOPE=all
       - KEYWORDS=VPS,优惠,补货
       - KEYWORD_GROUPS=[["香港","VPS"],["日本","线路"]]
-      - BLOCK_KEYWORDS=求购,已收
       - REGEX_PATTERNS=["年付\\s*\\d+","香港|日本"]
-      - MATCH_SCOPE=all
+      - PUSH_CATEGORY=trade
+      - BLOCK_KEYWORDS=求购,已收
       - CATEGORIES=all
-      - CHECK_INTERVAL_SECONDS=5
       - PUSH_EXISTING=false
-      # - PUSH_CATEGORY=trade
