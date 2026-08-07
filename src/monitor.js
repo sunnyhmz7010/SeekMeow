@@ -78,7 +78,7 @@ export class Monitor {
       try {
         await this.poll();
       } catch (error) {
-        this.logger.error(`轮询失败：${error.message}`);
+        this.logger.error(error.message);
       }
       try {
         await delay(this.config.checkIntervalMs, undefined, { signal });

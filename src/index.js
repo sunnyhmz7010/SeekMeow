@@ -66,7 +66,7 @@ export async function runApp({
     await pusher.pushHealthCheck();
     logger.info('自检 MeoW 推送正常');
   } catch (error) {
-    logger.error(`自检 MeoW 推送失败：${error.message}`);
+    logger.error(`自检 MeoW 推送失败，${error.message}`);
   }
 
   const controller = new AbortController();
@@ -79,13 +79,13 @@ export async function runApp({
         await fetchItems();
         logger.info('自检 RSS 连接正常');
       } catch (error) {
-        logger.warn(`自检 RSS 连接失败：${error.message}`);
+    logger.warn(`自检 RSS 连接失败，${error.message}`);
       }
       try {
         await pusher.pushHealthCheck();
         logger.info('自检 MeoW 推送正常');
       } catch (error) {
-        logger.error(`自检 MeoW 推送失败：${error.message}`);
+        logger.error(`自检 MeoW 推送失败，${error.message}`);
       }
     }, config.healthCheckMs);
   }
