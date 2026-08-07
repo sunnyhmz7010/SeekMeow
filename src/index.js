@@ -19,34 +19,26 @@ export function createLogger() {
 
 export function describeConfig(config) {
   const categories = config.categories ? [...config.categories].join(',') : 'all';
-  const ruleCount = config.keywords.length + config.keywordGroups.length + config.regexPatterns.length;
+  const ruleParts = [];
+  if (config.keywords.length) ruleParts.push(`关键词:${config.keywords.join(',')}`);
+  if (config.keywordGroups.length) ruleParts.push(`组合词:${config.keywordGroups.map((g) => g.join('+')).join(',')}`);
+  if (config.regexPatterns.length) ruleParts.push(`正则:${config.regexPatterns.map((r) => r.source).join(',')}`);
+  if (config.pushCategory) {
+    const label = config.pushCategory === 'all' ? 'all' : [...config.pushCategory].join(',');
+    ruleParts.push(`版块匹配:${label}`);
+  }
+  const ruleCount = ruleParts.length;
   const parts = [
     `MeoW 昵称 ${config.meowNickname}`,
     `轮询间隔 ${config.checkIntervalMs / 1000} 秒`,
     `匹配范围 ${config.matchScope}`,
-    `监控版块 ${categories}`
+    `监控版块 ${categories}`,
+    `规则 ${ruleCount} 条（${ruleParts.join(' | ')}）`
   ];
-  if (config.pushCategory) {
-    const label = config.pushCategory === 'all' ? 'all' : [...config.pushCategory].join(',');
-    parts.push(`版块匹配 ${label}`);
-  }
-  parts.push(`规则 ${ruleCount} 条`);
+  if (config.blockedKeywords.length) parts.push(`屏蔽词:${config.blockedKeywords.join(',')}`);
+  if (config.categories) parts.push(`版块过滤:${[...config.categories].join(',')}`);
   if (config.healthCheckMs) parts.push(`自检间隔 ${config.healthCheckMs / 60000} 分钟`);
   return parts.join('，');
-}
-
-export function describeRules(config) {
-  const lines = [];
-  if (config.keywords.length) lines.push(`关键词：${config.keywords.join(', ')}`);
-  if (config.keywordGroups.length) lines.push(`组合词：${config.keywordGroups.map((g) => g.join(' + ')).join('、')}`);
-  if (config.regexPatterns.length) lines.push(`正则：${config.regexPatterns.map((r) => r.source).join('、')}`);
-  if (config.pushCategory) {
-    const label = config.pushCategory === 'all' ? 'all' : [...config.pushCategory].join(', ');
-    lines.push(`版块匹配：${label}`);
-  }
-  if (config.blockedKeywords.length) lines.push(`屏蔽词：${config.blockedKeywords.join(', ')}`);
-  if (config.categories) lines.push(`版块过滤：${[...config.categories].join(', ')}`);
-  return lines.join(' | ');
 }
 
 export async function runApp({
@@ -60,8 +52,6 @@ export async function runApp({
 } = {}) {
   const config = parseConfig(env);
   logger.info(`启动配置：${describeConfig(config)}`);
-  const rules = describeRules(config);
-  if (rules) logger.info(`生效规则：${rules}`);
 
   const pusher = pusherFactory(config);
 
