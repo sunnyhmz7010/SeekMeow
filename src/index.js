@@ -31,7 +31,22 @@ export function describeConfig(config) {
     parts.push(`版块匹配 ${label}`);
   }
   parts.push(`规则 ${ruleCount} 条`);
+  if (config.healthCheckMs) parts.push(`自检间隔 ${config.healthCheckMs / 60000} 分钟`);
   return parts.join('，');
+}
+
+export function describeRules(config) {
+  const lines = [];
+  if (config.keywords.length) lines.push(`关键词：${config.keywords.join(', ')}`);
+  if (config.keywordGroups.length) lines.push(`组合词：${config.keywordGroups.map((g) => g.join(' + ')).join('、')}`);
+  if (config.regexPatterns.length) lines.push(`正则：${config.regexPatterns.map((r) => r.source).join('、')}`);
+  if (config.pushCategory) {
+    const label = config.pushCategory === 'all' ? 'all' : [...config.pushCategory].join(', ');
+    lines.push(`版块匹配：${label}`);
+  }
+  if (config.blockedKeywords.length) lines.push(`屏蔽词：${config.blockedKeywords.join(', ')}`);
+  if (config.categories) lines.push(`版块过滤：${[...config.categories].join(', ')}`);
+  return lines.join(' | ');
 }
 
 export async function runApp({
@@ -45,10 +60,10 @@ export async function runApp({
 } = {}) {
   const config = parseConfig(env);
   logger.info(`启动配置：${describeConfig(config)}`);
+  const rules = describeRules(config);
+  if (rules) logger.info(`生效规则：${rules}`);
 
   const pusher = pusherFactory(config);
-  await pusher.pushStartupTest();
-  logger.info('MeoW 启动测试推送成功');
 
   try {
     await fetchItems();
@@ -56,6 +71,9 @@ export async function runApp({
   } catch (error) {
     logger.warn(`RSS 连接检测失败: ${error.message}`);
   }
+
+  await pusher.pushHealthCheck();
+  logger.info('自检推送成功');
 
   const controller = new AbortController();
   let healthCheckTimer;
@@ -65,7 +83,7 @@ export async function runApp({
         await fetchItems();
         logger.info('自检 RSS 连接正常');
         await pusher.pushHealthCheck();
-        logger.info('自检 MeoW 推送正常');
+        logger.info('自检推送成功');
       } catch (error) {
         logger.error(`自检失败: ${error.message}`);
       }

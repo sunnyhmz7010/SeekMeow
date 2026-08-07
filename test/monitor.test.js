@@ -95,25 +95,7 @@ test('MeoW 消息正文使用中文版块、关键词和中文时间，摘要完
   ].join('\n'));
 });
 
-test('MeoW 启动测试推送使用固定标题、链接和图标', async () => {
-  let body;
-  const fetchImpl = async (url, options) => {
-    body = JSON.parse(options.body);
-    return new Response(JSON.stringify({ status: 200, message: '推送成功' }), { status: 200 });
-  };
-  const client = createMeowClient({ nickname: 'tester', fetchImpl });
-
-  await client.pushStartupTest();
-
-  assert.deepEqual(body, {
-    title: 'SeekMeow 启动测试',
-    msg: 'SeekMeow 已启动，NodeSeek RSS 关键词监控正在运行。',
-    url: 'https://www.nodeseek.com/',
-    imgUrl: 'https://nodeseek.cc/uploads/default/optimized/1X/47c7a8a16553966c7b7b52b85dda45bbceb42d1b_2_512x512.png'
-  });
-});
-
-test('MeoW 自检推送使用固定标题和链接', async () => {
+test('MeoW 自检推送使用固定标题、链接和图标', async () => {
   let body;
   const fetchImpl = async (url, options) => {
     body = JSON.parse(options.body);
@@ -123,10 +105,12 @@ test('MeoW 自检推送使用固定标题和链接', async () => {
 
   await client.pushHealthCheck();
 
-  assert.equal(body.title, 'SeekMeow 自检');
-  assert.ok(body.msg.includes('SeekMeow 自检通过'));
-  assert.equal(body.url, 'https://www.nodeseek.com/');
-  assert.ok(body.imgUrl);
+  assert.deepEqual(body, {
+    title: 'SeekMeow 自检',
+    msg: 'SeekMeow 已启动，RSS 与 MeoW 连接正常。',
+    url: 'https://www.nodeseek.com/',
+    imgUrl: 'https://nodeseek.cc/uploads/default/optimized/1X/47c7a8a16553966c7b7b52b85dda45bbceb42d1b_2_512x512.png'
+  });
 });
 
 test('MeoW HTTP、JSON 和业务失败均抛错', async () => {
