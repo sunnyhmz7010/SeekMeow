@@ -15,7 +15,7 @@ test('启动配置摘要包含昵称、轮询间隔、匹配范围、版块、�
     pushCategory: new Set(['trade']),
     blockedKeywords: ['求购'],
     categories: new Set(['trade', 'daily'])
-  }), 'MeoW 昵称 tester，轮询间隔 5 秒，匹配范围 all，监控版块 trade,daily，规则 4 条（关键词:VPS,优惠 | 组合词:香港+VPS | 正则:年付 | 版块匹配:trade），屏蔽词:求购，版块过滤:trade,daily，自检间隔 60 分钟');
+  }), 'MeoW 昵称 tester，轮询间隔 5 秒，匹配范围 all，监控版块 trade,daily，规则 4 条（关键词：VPS,优惠 | 组合词：香港+VPS | 正则：年付 | 版块匹配：trade），屏蔽词：求购，版块过滤：trade,daily，自检间隔 60 分钟');
 });
 
 test('启动时自检 RSS 连接并推送自检通知', async () => {
@@ -48,7 +48,8 @@ test('启动时自检 RSS 连接并推送自检通知', async () => {
   });
 
   assert.deepEqual(events, ['health-check', 'monitor', 'run']);
-  assert.equal(logs[0], '启动配置：MeoW 昵称 tester，轮询间隔 5 秒，匹配范围 all，监控版块 all，规则 1 条（关键词:VPS），自检间隔 60 分钟');
-  assert.equal(logs[1], '自检通过，RSS 与 MeoW 连接正常');
-  assert.equal(logs[2], '监控已启动');
+  assert.equal(logs[0], '启动配置：MeoW 昵称 tester，轮询间隔 5 秒，匹配范围 all，监控版块 all，规则 1 条（关键词：VPS），自检间隔 60 分钟');
+  assert.equal(logs[1], '自检 RSS 连接正常');
+  assert.equal(logs[2], '自检 MeoW 推送正常');
+  assert.equal(logs[3], '监控已启动');
 });

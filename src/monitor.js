@@ -57,7 +57,7 @@ export class Monitor {
         continue;
       }
 
-      this.logger.info(`命中帖子 ${item.id}: ${formatReason(result.reason)}`);
+      this.logger.info(`命中帖子 ${item.id}：${formatReason(result.reason)}`);
       try {
         await this.pusher.push(item, result);
         const removed = this.state.removePending(item.id);
@@ -65,7 +65,7 @@ export class Monitor {
         this.logger.info(`推送成功 ${item.id}`);
       } catch (error) {
         changed = this.state.addPending(item) || changed;
-        this.logger.error(`推送失败 ${item.id}: ${error.message}`);
+        this.logger.error(`推送失败 ${item.id}：${error.message}`);
       }
     }
 
@@ -78,7 +78,7 @@ export class Monitor {
       try {
         await this.poll();
       } catch (error) {
-        this.logger.error(`轮询失败: ${error.message}`);
+        this.logger.error(`轮询失败：${error.message}`);
       }
       try {
         await delay(this.config.checkIntervalMs, undefined, { signal });

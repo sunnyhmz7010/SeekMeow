@@ -20,12 +20,12 @@ export function createLogger() {
 export function describeConfig(config) {
   const categories = config.categories ? [...config.categories].join(',') : 'all';
   const ruleParts = [];
-  if (config.keywords.length) ruleParts.push(`关键词:${config.keywords.join(',')}`);
-  if (config.keywordGroups.length) ruleParts.push(`组合词:${config.keywordGroups.map((g) => g.join('+')).join(',')}`);
-  if (config.regexPatterns.length) ruleParts.push(`正则:${config.regexPatterns.map((r) => r.source).join(',')}`);
+  if (config.keywords.length) ruleParts.push(`关键词：${config.keywords.join(',')}`);
+  if (config.keywordGroups.length) ruleParts.push(`组合词：${config.keywordGroups.map((g) => g.join('+')).join(',')}`);
+  if (config.regexPatterns.length) ruleParts.push(`正则：${config.regexPatterns.map((r) => r.source).join(',')}`);
   if (config.pushCategory) {
     const label = config.pushCategory === 'all' ? 'all' : [...config.pushCategory].join(',');
-    ruleParts.push(`版块匹配:${label}`);
+    ruleParts.push(`版块匹配：${label}`);
   }
   const ruleCount = ruleParts.length;
   const parts = [
@@ -35,8 +35,8 @@ export function describeConfig(config) {
     `监控版块 ${categories}`,
     `规则 ${ruleCount} 条（${ruleParts.join(' | ')}）`
   ];
-  if (config.blockedKeywords.length) parts.push(`屏蔽词:${config.blockedKeywords.join(',')}`);
-  if (config.categories) parts.push(`版块过滤:${[...config.categories].join(',')}`);
+  if (config.blockedKeywords.length) parts.push(`屏蔽词：${config.blockedKeywords.join(',')}`);
+  if (config.categories) parts.push(`版块过滤：${[...config.categories].join(',')}`);
   if (config.healthCheckMs) parts.push(`自检间隔 ${config.healthCheckMs / 60000} 分钟`);
   return parts.join('，');
 }
@@ -55,44 +55,36 @@ export async function runApp({
 
   const pusher = pusherFactory(config);
 
-  let rssOk = false;
   try {
     await fetchItems();
-    rssOk = true;
+    logger.info('自检 RSS 连接正常');
   } catch (error) {
-    logger.warn(`自检 RSS 连接失败: ${error.message}`);
+    logger.warn(`自检 RSS 连接失败：${error.message}`);
   }
 
-  let meowOk = false;
   try {
     await pusher.pushHealthCheck();
-    meowOk = true;
+    logger.info('自检 MeoW 推送正常');
   } catch (error) {
-    logger.error(`自检推送失败: ${error.message}`);
-  }
-
-  if (rssOk && meowOk) {
-    logger.info('自检通过，RSS 与 MeoW 连接正常');
+    logger.error(`自检 MeoW 推送失败：${error.message}`);
   }
 
   const controller = new AbortController();
   let healthCheckTimer;
   if (config.healthCheckMs) {
     healthCheckTimer = setInterval(async () => {
-      let ok = true;
       try {
         await fetchItems();
+        logger.info('自检 RSS 连接正常');
       } catch (error) {
-        logger.warn(`自检 RSS 连接失败: ${error.message}`);
-        ok = false;
+        logger.warn(`自检 RSS 连接失败：${error.message}`);
       }
       try {
         await pusher.pushHealthCheck();
+        logger.info('自检 MeoW 推送正常');
       } catch (error) {
-        logger.error(`自检推送失败: ${error.message}`);
-        ok = false;
+        logger.error(`自检 MeoW 推送失败：${error.message}`);
       }
-      if (ok) logger.info('自检通过，RSS 与 MeoW 连接正常');
     }, config.healthCheckMs);
   }
 
