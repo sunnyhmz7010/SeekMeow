@@ -19,7 +19,6 @@ export function matchItem(item, config) {
   if (config.pushCategory) {
     const hit = config.pushCategory === 'all' || config.pushCategory.has(item.category);
     if (hit) return { matched: true, reason: `category-push:${item.category}` };
-    return { matched: false, reason: 'category-mismatch' };
   }
 
   const keyword = config.keywords.find((candidate) =>

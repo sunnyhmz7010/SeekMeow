@@ -81,7 +81,7 @@ test('PUSH_CATEGORY 命中时跳过关键词直接推送', () => {
   );
   assert.deepEqual(
     matchItem(item, config({ pushCategory: new Set(['daily']) })),
-    { matched: false, reason: 'category-mismatch' }
+    { matched: false, reason: 'no-match' }
   );
 });
 
@@ -89,5 +89,12 @@ test('PUSH_CATEGORY 模式下屏蔽词仍然优先', () => {
   assert.deepEqual(
     matchItem(item, config({ pushCategory: new Set(['trade']), blockedKeywords: ['VPS'] })),
     { matched: false, reason: 'blocked:VPS' }
+  );
+});
+
+test('PUSH_CATEGORY 不命中时仍走关键词匹配', () => {
+  assert.deepEqual(
+    matchItem(item, config({ pushCategory: new Set(['daily']), keywords: ['VPS'] })),
+    { matched: true, reason: 'keyword:VPS' }
   );
 });
