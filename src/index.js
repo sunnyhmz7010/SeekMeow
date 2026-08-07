@@ -72,7 +72,9 @@ export async function runApp({
   const controller = new AbortController();
   let healthCheckTimer;
   if (config.healthCheckMs) {
+    const startupTime = Date.now();
     healthCheckTimer = setInterval(async () => {
+      if (Date.now() - startupTime < 300000) return;
       try {
         await fetchItems();
         logger.info('自检 RSS 连接正常');
