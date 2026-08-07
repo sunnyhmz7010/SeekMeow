@@ -1,4 +1,5 @@
 import { setTimeout as delay } from 'node:timers/promises';
+import { formatReason } from './meow.js';
 
 function chronological(items) {
   return items
@@ -56,7 +57,7 @@ export class Monitor {
         continue;
       }
 
-      this.logger.info(`命中帖子 ${item.id}: ${result.reason}`);
+      this.logger.info(`命中帖子 ${item.id}: ${formatReason(result.reason)}`);
       try {
         await this.pusher.push(item, result);
         const removed = this.state.removePending(item.id);

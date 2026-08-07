@@ -59,7 +59,6 @@ test('启动时自检 RSS 连接并推送自检通知', async () => {
   assert.deepEqual(events, ['health-check', 'monitor', 'run']);
   assert.equal(logs[0], '启动配置：MeoW 昵称 tester，轮询间隔 5 秒，匹配范围 all，监控版块 all，规则 1 条，自检间隔 60 分钟');
   assert.equal(logs[1], '生效规则：关键词：VPS');
-  assert.equal(logs[2], 'RSS 连接正常');
-  assert.equal(logs[3], '自检推送成功');
-  assert.equal(logs[4], '监控已启动');
+  assert.equal(logs[2], '自检通过，RSS 与 MeoW 连接正常');
+  assert.equal(logs[3], '监控已启动');
 });

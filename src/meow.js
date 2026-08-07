@@ -31,6 +31,17 @@ function formatKeyword(reason = '') {
   return '未知';
 }
 
+export function formatReason(reason = '') {
+  if (reason.startsWith('keyword:')) return `关键词:${reason.slice('keyword:'.length)}`;
+  if (reason.startsWith('group:')) return `组合词:${reason.slice('group:'.length).split('+').join(' + ')}`;
+  if (reason.startsWith('regex:')) return `正则:${reason.slice('regex:'.length)}`;
+  if (reason.startsWith('category-push:')) return `版块匹配:${categoryName(reason.slice('category-push:'.length))}`;
+  if (reason.startsWith('blocked:')) return `屏蔽词:${reason.slice('blocked:'.length)}`;
+  if (reason === 'category') return '版块过滤';
+  if (reason === 'no-match') return '未命中';
+  return reason;
+}
+
 function formatChineseTime(value) {
   const time = Date.parse(value);
   if (Number.isNaN(time)) return value || '未知';
