@@ -28,7 +28,7 @@ export function describeConfig(config) {
   ];
   if (config.pushCategory) {
     const label = config.pushCategory === 'all' ? 'all' : [...config.pushCategory].join(',');
-    parts.push(`版块推送模式 ${label}`);
+    parts.push(`版块匹配 ${label}`);
   }
   parts.push(`规则 ${ruleCount} 条`);
   return parts.join('，');
