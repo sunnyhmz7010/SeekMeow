@@ -88,6 +88,7 @@ docker run -d \
   -e CATEGORIES=all \
   -e CHECK_INTERVAL_SECONDS=5 \
   -e PUSH_EXISTING=false \
+  # -e PUSH_CATEGORY=trade \
   ghcr.io/sunnyhmz7010/seekmeow:latest
 ```
 
@@ -111,6 +112,7 @@ docker run -d \
   -e CATEGORIES=all \
   -e CHECK_INTERVAL_SECONDS=5 \
   -e PUSH_EXISTING=false \
+  # -e PUSH_CATEGORY=trade \
   seekmeow
 ```
 
