@@ -26,7 +26,7 @@ export function matchItem(item, config) {
   const keyword = config.keywords.filter((candidate) =>
     normalized.includes(candidate.toLowerCase())
   );
-  if (keyword.length) reasons.push(`keyword:${keyword.join(',')}`);
+  if (keyword.length) reasons.push(`keyword:${keyword.join(' ')}`);
 
   const group = config.keywordGroups.filter((candidates) =>
     candidates.every((candidate) => normalized.includes(candidate.toLowerCase()))
