@@ -56,6 +56,7 @@ services:
       - CATEGORIES=all
       - CHECK_INTERVAL_SECONDS=5
       - PUSH_EXISTING=false
+      # - PUSH_CATEGORY=trade
 ```
 
 然后启动：
