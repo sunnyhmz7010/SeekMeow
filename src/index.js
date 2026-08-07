@@ -77,7 +77,7 @@ export async function runApp({
   if (config.healthCheckMs) {
     const startupTime = Date.now();
     healthCheckTimer = setInterval(async () => {
-      if (Date.now() - startupTime < 300000) return;
+      if (Date.now() - startupTime < 60000) return;
       let rssOk = true;
       try {
         await fetchItems();
