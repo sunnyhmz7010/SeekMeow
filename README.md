@@ -34,6 +34,8 @@ NodeSeek 上 VPS 优惠、补货等情报稍纵即逝，人工盯版块既费时
 
 镜像已发布到 GitHub Container Registry，直接拉取运行即可：
 
+### 🖥️ 命令行方式
+
 ```bash
 docker run -d \
   --name seekmeow \
@@ -43,18 +45,39 @@ docker run -d \
   -e KEYWORD_GROUPS='[["香港","VPS"],["日本","线路"]]' \
   -e BLOCK_KEYWORDS="求购,已收" \
   -e REGEX_PATTERNS='["年付\\s*\\d+","香港|日本"]' \
-  -e MATCH_SCOPE="all" \
-  -e CATEGORIES="all" \
-  -e CHECK_INTERVAL_SECONDS="5" \
-  -e PUSH_EXISTING="false" \
+  -e MATCH_SCOPE=all \
+  -e CATEGORIES=all \
+  -e CHECK_INTERVAL_SECONDS=5 \
+  -e PUSH_EXISTING=false \
   ghcr.io/sunnyhmz7010/seekmeow:latest
 ```
 
-容器不监听端口，也不要求映射目录。首次启动默认把当前 RSS 条目作为基线，只推送之后出现的新帖；设置 `PUSH_EXISTING=true` 后会同时检查 RSS 中已有的帖子。
+### 🧩 Docker Compose 方式
+
+项目已提供 [compose.yaml](./compose.yaml)，按需修改其中的环境变量后启动：
+
+```bash
+docker compose up -d --build
+```
+
+查看日志：
+
+```bash
+docker compose logs -f
+```
+
+容器不监听端口，也不要求映射目录。首次启动默认把当前 RSS 条目作为基线，只推送之后出现的新帖；设置 `PUSH_EXISTING=true` 后会同时检查当前 RSS 中已有的帖子。
 
 ## 📖 使用说明
 
 ### 环境变量
+
+不同配置入口的引号规则：
+
+- 图形化 Docker 界面：不要加外层引号，值直接填 `false`、`all`、`VPS,优惠,补货`。
+- Docker Compose：使用 `compose.yaml` 中的列表写法时，不需要外层引号。
+- 命令行 `docker run -e`：简单值不需要引号；中文、逗号、JSON、正则建议加引号，避免被 shell 错误拆分。
+- JSON 配置值内部的双引号必须保留，例如 `KEYWORD_GROUPS=[["香港","VPS"]]`；不要再额外包一层 `"..."` 或 `'...'`，除非是在命令行里保护 shell 解析。
 
 | 变量 | 必填 | 默认值 | 说明 |
 | --- | --- | --- | --- |
