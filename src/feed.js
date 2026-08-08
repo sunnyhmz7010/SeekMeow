@@ -53,6 +53,10 @@ export function parseFeed(xml) {
   }).filter(Boolean);
 }
 
+function sanitizeXml(xml) {
+  return xml.replace(/\uFFFD/gu, '');
+}
+
 export async function fetchFeed({
   fetchImpl = globalThis.fetch,
   timeoutMs = 15000
@@ -62,5 +66,5 @@ export async function fetchFeed({
     signal: AbortSignal.timeout(timeoutMs)
   });
   if (!response.ok) throw new Error(`RSS 请求失败: HTTP ${response.status}`);
-  return parseFeed(await response.text());
+  return parseFeed(sanitizeXml(await response.text()));
 }
