@@ -40,11 +40,11 @@ docker build -t seekmeow .  # 构建镜像
 ## 架构分层
 
 ```
-src/index.js     ← 入口：启动自检、定时自检、信号处理、主循环
+src/index.js     ← 入口：启动自检、定时自检、版本检查、信号处理、主循环
 src/config.js    ← 环境变量解析与校验（非法值直接抛错退出）
 src/feed.js      ← RSS 抓取与 XML/HTML 解析
 src/matcher.js   ← 匹配引擎：CATEGORIES 过滤 → 屏蔽词 → 收集全部命中规则（取并集）
-src/meow.js      ← MeoW 推送客户端（push / pushHealthCheck / pushError）、命中规则格式化
+src/meow.js      ← MeoW 推送客户端（push / pushHealthCheck / pushError）、命中规则格式化、版本信息追加
 src/monitor.js   ← 轮询调度、去重、失败重试、RSS 异常推送
 src/state.js     ← 状态持久化（原子写入、限长裁剪）
 ```
@@ -70,6 +70,6 @@ src/state.js     ← 状态持久化（原子写入、限长裁剪）
 | `PUSH_CATEGORY` | 条件必填 | - | 版块匹配（`all` 或逗号分隔版块标识） |
 | `BLOCK_KEYWORDS` | 否 | - | 屏蔽词（逗号分隔），所有规则均生效 |
 | `PUSH_EXISTING` | 否 | `false` | 首次启动是否推送已有帖子 |
-| `HEALTH_CHECK_MINUTES` | 否 | `60` | 定时自检间隔（分钟），0 关闭 |
+| `HEALTH_CHECK_MINUTES` | 否 | `60` | 定时自检间隔（分钟），0 关闭。自检时验证 RSS/MeoW 连接并检查版本更新 |
 
 条件必填项（`KEYWORDS` / `KEYWORD_GROUPS` / `REGEX_PATTERNS` / `PUSH_CATEGORY`）至少配置一种。
