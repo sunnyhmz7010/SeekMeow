@@ -15,7 +15,7 @@ test('启动配置摘要包含版本、昵称、轮询间隔、匹配范围、�
     pushCategory: new Set(['trade']),
     blockedKeywords: ['求购'],
     categories: new Set(['trade', 'daily'])
-  }), '版本 v1.7.1，MeoW 昵称 tester，轮询间隔 5 秒，匹配范围 all，监控版块 trade,daily，规则 4 条（关键词：VPS,优惠 | 组合词：香港+VPS | 正则：年付 | 版块匹配：trade），屏蔽词：求购，版块过滤：trade,daily，自检间隔 60 分钟');
+  }), '版本 v1.8.0，MeoW 昵称 tester，轮询间隔 5 秒，匹配范围 all，监控版块 trade,daily，规则 4 条（关键词：VPS,优惠 | 组合词：香港+VPS | 正则：年付 | 版块匹配：trade），屏蔽词：求购，版块过滤：trade,daily，自检间隔 60 分钟');
 });
 
 test('启动时自检 RSS 连接并推送自检通知', async () => {
@@ -39,7 +39,7 @@ test('启动时自检 RSS 连接并推送自检通知', async () => {
     monitorFactory: () => monitor,
     pusherFactory: () => pusher,
     fetchItems: async () => [],
-    checkUpdateFn: async (logger) => { logger.info('当前已是最新版本 v1.7.1'); return null; },
+    checkUpdateFn: async (logger) => { logger.info('当前已是最新版本 v1.8.0'); return null; },
     registerSignals: false,
     logger: {
       info(message) { logs.push(message); },
@@ -49,9 +49,9 @@ test('启动时自检 RSS 连接并推送自检通知', async () => {
   });
 
   assert.deepEqual(events, ['health-check', 'monitor', 'run']);
-  assert.equal(logs[0], '启动配置：版本 v1.7.1，MeoW 昵称 tester，轮询间隔 5 秒，匹配范围 all，监控版块 all，规则 1 条（关键词：VPS），自检间隔 60 分钟');
+  assert.equal(logs[0], '启动配置：版本 v1.8.0，MeoW 昵称 tester，轮询间隔 5 秒，匹配范围 all，监控版块 all，规则 1 条（关键词：VPS），自检间隔 60 分钟');
   assert.equal(logs[1], '自检 RSS 连接正常');
-  assert.equal(logs[2], '当前已是最新版本 v1.7.1');
+  assert.equal(logs[2], '当前已是最新版本 v1.8.0');
   assert.equal(logs[3], '自检 MeoW 推送正常');
   assert.equal(logs[4], '监控已启动');
 });
@@ -76,7 +76,7 @@ test('启动自检 RSS 失败时推送降级自检通知', async () => {
     monitorFactory: () => monitor,
     pusherFactory: () => pusher,
     fetchItems: async () => { throw new Error('rss down'); },
-    checkUpdateFn: async (logger) => { logger.info('当前已是最新版本 v1.7.1'); return null; },
+    checkUpdateFn: async (logger) => { logger.info('当前已是最新版本 v1.8.0'); return null; },
     registerSignals: false,
     logger: {
       info() {},
@@ -85,7 +85,7 @@ test('启动自检 RSS 失败时推送降级自检通知', async () => {
     }
   });
 
-  assert.deepEqual(events, [{ rssOk: false, version: '1.7.1', updateInfo: null }]);
+  assert.deepEqual(events, [{ rssOk: false, version: '1.8.0', updateInfo: null }]);
 });
 
 test('启动自检 MeoW 推送失败时拒绝启动', async () => {
@@ -105,7 +105,7 @@ test('启动自检 MeoW 推送失败时拒绝启动', async () => {
     monitorFactory: () => monitor,
     pusherFactory: () => pusher,
     fetchItems: async () => [],
-    checkUpdateFn: async (logger) => { logger.info('当前已是最新版本 v1.7.1'); return null; },
+    checkUpdateFn: async (logger) => { logger.info('当前已是最新版本 v1.8.0'); return null; },
     registerSignals: false,
     logger: {
       info() {},

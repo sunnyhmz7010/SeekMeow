@@ -8,6 +8,9 @@ export function cleanSummary(value = '') {
     'text/html'
   );
   return (document.getElementsByTagName('body').item(0)?.textContent ?? value)
+    .replace(/\x1B\[[0-9;]*[a-zA-Z]/g, '')
+    .replace(/\[[0-9;]+[a-zA-Z](?![a-zA-Z0-9])/g, '')
+    .replace(/\[[HJKR](?![a-zA-Z])/g, '')
     .replace(/\s+/gu, ' ')
     .trim();
 }

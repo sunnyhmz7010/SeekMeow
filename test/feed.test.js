@@ -30,6 +30,13 @@ test('清理摘要中的 HTML、实体和多余空白', () => {
   assert.equal(cleanSummary('&copy; &mdash; &hellip;'), '© — …');
 });
 
+test('清理 ANSI 转义序列和残留控制码', () => {
+  assert.equal(cleanSummary('\x1B[1m测试\x1B[0m'), '测试');
+  assert.equal(cleanSummary('💻基本信息\x1B[H\x1B[J\x1B[0m'), '💻基本信息');
+  assert.equal(cleanSummary('终端输出 [H[J[1;32m正常文本'), '终端输出 正常文本');
+  assert.equal(cleanSummary('CPU [32m型号'), 'CPU 型号');
+});
+
 test('解析 RSS 条目并优先使用 guid', () => {
   const items = parseFeed(RSS);
 
