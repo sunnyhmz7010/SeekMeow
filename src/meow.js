@@ -111,12 +111,22 @@ export function createMeowClient({
         url: item.link
       });
     },
-    async pushHealthCheck({ rssOk = true } = {}) {
+    async pushHealthCheck({ rssOk = true, version = '', updateInfo = null } = {}) {
+      const lines = [];
+      if (rssOk) {
+        lines.push('SeekMeow 已启动，RSS 与 MeoW 连接正常。');
+      } else {
+        lines.push('SeekMeow 已启动，MeoW 连接正常；RSS 连接异常，请检查网络或 NodeSeek RSS 服务。');
+      }
+      if (version) {
+        const updateLine = updateInfo
+          ? `当前版本：v${version}，发现新版本 v${updateInfo.latestVersion}！请访问 ${updateInfo.url} 查看更新。`
+          : `当前版本：v${version}`;
+        lines.push(updateLine);
+      }
       await post({
         title: 'SeekMeow 自检',
-        msg: rssOk
-          ? 'SeekMeow 已启动，RSS 与 MeoW 连接正常。'
-          : 'SeekMeow 已启动，MeoW 连接正常；RSS 连接异常，请检查网络或 NodeSeek RSS 服务。',
+        msg: lines.join('\n'),
         url: NODESEEK_HOME_URL
       });
     },

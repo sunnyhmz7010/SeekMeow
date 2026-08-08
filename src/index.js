@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 
 import { parseConfig } from './config.js';
@@ -8,6 +9,10 @@ import { createMeowClient } from './meow.js';
 import { Monitor } from './monitor.js';
 import { StateStore } from './state.js';
 
+const require = createRequire(import.meta.url);
+const pkg = require('../package.json');
+const VERSION = pkg.version;
+
 export function createLogger() {
   const write = (level, message) => console[level](`[${new Date().toISOString()}] ${message}`);
   return {
@@ -15,6 +20,38 @@ export function createLogger() {
     warn: (message) => write('warn', message),
     error: (message) => write('error', message)
   };
+}
+
+function compareSemver(a, b) {
+  const partsA = a.split('.').map(Number);
+  const partsB = b.split('.').map(Number);
+  for (let i = 0; i < 3; i++) {
+    if (partsA[i] > partsB[i]) return 1;
+    if (partsA[i] < partsB[i]) return -1;
+  }
+  return 0;
+}
+
+async function checkUpdate(logger, currentVersion, fetchImpl = globalThis.fetch) {
+  try {
+    const response = await fetchImpl(
+      'https://api.github.com/repos/sunnyhmz7010/SeekMeow/releases/latest',
+      { signal: AbortSignal.timeout(10000) }
+    );
+    if (!response.ok) return null;
+    const release = await response.json();
+    const latestVersion = release.tag_name?.replace(/^v/, '');
+    if (!latestVersion) return null;
+    if (compareSemver(latestVersion, currentVersion) > 0) {
+      const info = `发现新版本 v${latestVersion}（当前 v${currentVersion}），请访问 ${release.html_url} 查看更新`;
+      logger.info(info);
+      return { latestVersion, url: release.html_url };
+    }
+    logger.info(`当前已是最新版本 v${currentVersion}`);
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 export function describeConfig(config) {
@@ -29,6 +66,7 @@ export function describeConfig(config) {
   }
   const ruleCount = ruleParts.length;
   const parts = [
+    `版本 v${VERSION}`,
     `MeoW 昵称 ${config.meowNickname}`,
     `轮询间隔 ${config.checkIntervalMs / 1000} 秒`,
     `匹配范围 ${config.matchScope}`,
@@ -48,6 +86,7 @@ export async function runApp({
   pusherFactory = (config) => createMeowClient({ nickname: config.meowNickname }),
   monitorFactory = (options) => new Monitor(options),
   fetchItems = () => fetchFeed(),
+  checkUpdateFn = (logger_, currentVersion, fetchImpl) => checkUpdate(logger_, currentVersion, fetchImpl),
   registerSignals = true
 } = {}) {
   const config = parseConfig(env);
@@ -64,8 +103,10 @@ export async function runApp({
     logger.warn(`自检 RSS 连接失败：${error.message}`);
   }
 
+  const updateInfo = await checkUpdateFn(logger, VERSION);
+
   try {
-    await pusher.pushHealthCheck({ rssOk: startupRssOk });
+    await pusher.pushHealthCheck({ rssOk: startupRssOk, version: VERSION, updateInfo });
     logger.info('自检 MeoW 推送正常');
   } catch (error) {
     logger.error(`自检 MeoW 推送失败，${error.message}`);
@@ -86,8 +127,9 @@ export async function runApp({
         rssOk = false;
         logger.warn(`自检 RSS 连接失败，${error.message}`);
       }
+      const periodicUpdateInfo = await checkUpdateFn(logger, VERSION);
       try {
-        await pusher.pushHealthCheck({ rssOk });
+        await pusher.pushHealthCheck({ rssOk, version: VERSION, updateInfo: periodicUpdateInfo });
         logger.info('自检 MeoW 推送正常');
       } catch (error) {
         logger.error(`自检 MeoW 推送失败，${error.message}`);
