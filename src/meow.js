@@ -121,7 +121,7 @@ export function createMeowClient({
       if (version) {
         const updateLine = updateInfo
           ? `当前版本：v${version}，发现新版本 v${updateInfo.latestVersion}！请访问 ${updateInfo.url} 查看更新。`
-          : `当前版本：v${version}`;
+          : `当前已是最新版本：v${version}`;
         lines.push(updateLine);
       }
       await post({
