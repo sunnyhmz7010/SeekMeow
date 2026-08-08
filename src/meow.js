@@ -136,6 +136,13 @@ export function createMeowClient({
         msg: message,
         url: NODESEEK_HOME_URL
       });
+    },
+    async pushRecovery() {
+      await post({
+        title: 'SeekMeow 恢复',
+        msg: 'RSS 连接已恢复，监控正常运行。',
+        url: NODESEEK_HOME_URL
+      });
     }
   };
 }

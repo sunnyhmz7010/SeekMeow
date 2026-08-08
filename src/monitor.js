@@ -74,16 +74,30 @@ export class Monitor {
   }
 
   async run(signal) {
+    let lastRssError = false;
     while (!signal.aborted) {
       try {
         await this.poll();
+        if (lastRssError) {
+          this.logger.info('RSS 连接已恢复');
+          try {
+            await this.pusher.pushRecovery();
+            this.logger.info('RSS 恢复通知推送成功');
+          } catch (pushError) {
+            this.logger.error(`RSS 恢复通知推送失败，${pushError.message}`);
+          }
+          lastRssError = false;
+        }
       } catch (error) {
         this.logger.error(error.message);
-        try {
-          await this.pusher.pushError(error.message);
-          this.logger.info('RSS 异常通知推送成功');
-        } catch (pushError) {
-          this.logger.error(`RSS 异常通知推送失败，${pushError.message}`);
+        if (!lastRssError) {
+          try {
+            await this.pusher.pushError(error.message);
+            this.logger.info('RSS 异常通知推送成功');
+          } catch (pushError) {
+            this.logger.error(`RSS 异常通知推送失败，${pushError.message}`);
+          }
+          lastRssError = true;
         }
       }
       try {

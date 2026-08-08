@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { setTimeout } from 'node:timers/promises';
 import test from 'node:test';
 
 import { createMeowClient, formatMessage } from '../src/meow.js';
@@ -303,4 +304,62 @@ test('有效发布时间先于无效发布时间处理', async () => {
   await monitor.initialize();
   await monitor.poll();
   assert.deepEqual(attempts, ['valid', 'invalid']);
+});
+
+test('RSS 连续异常仅推送一次，恢复后推送恢复通知', async () => {
+  const state = memoryState({ existed: true });
+  const events = [];
+  const controller = new AbortController();
+  let pollCalls = 0;
+
+  const monitor = new Monitor({
+    config: monitorConfig(),
+    fetchItems: async () => {
+      pollCalls++;
+      if (pollCalls <= 2) throw new Error('rss down');
+      return [];
+    },
+    matcher: () => ({ matched: true, reason: 'keyword:VPS' }),
+    pusher: {
+      pushError: async (msg) => events.push({ type: 'error', msg }),
+      pushRecovery: async () => events.push({ type: 'recovery' })
+    },
+    state,
+    logger: silentLogger
+  });
+
+  await monitor.initialize();
+
+  let resolved = false;
+  const runPromise = monitor.run(controller.signal).then(() => { resolved = true; });
+
+  await setTimeout(50);
+  controller.abort();
+  await Promise.race([runPromise, setTimeout(1000)]);
+
+  assert.equal(resolved, true, 'run 应在信号中止后结束');
+
+  const errors = events.filter((e) => e.type === 'error');
+  const recoveries = events.filter((e) => e.type === 'recovery');
+  assert.equal(errors.length, 1, '应仅推送一次异常通知');
+  assert.equal(errors[0].msg, 'rss down');
+  assert.equal(recoveries.length, 1, '恢复后应推送一次恢复通知');
+});
+
+test('MeoW 恢复通知使用固定标题、消息和链接', async () => {
+  let body;
+  const fetchImpl = async (url, options) => {
+    body = JSON.parse(options.body);
+    return new Response(JSON.stringify({ status: 200, message: '推送成功' }), { status: 200 });
+  };
+  const client = createMeowClient({ nickname: 'tester', fetchImpl });
+
+  await client.pushRecovery();
+
+  assert.deepEqual(body, {
+    title: 'SeekMeow 恢复',
+    msg: 'RSS 连接已恢复，监控正常运行。',
+    url: 'https://www.nodeseek.com/',
+    imgUrl: 'https://nodeseek.cc/uploads/default/optimized/1X/47c7a8a16553966c7b7b52b85dda45bbceb42d1b_2_512x512.png'
+  });
 });
