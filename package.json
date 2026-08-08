@@ -1,6 +1,6 @@
 {
   "name": "seekmeow",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "自动订阅 NodeSeek RSS，按关键词/版块匹配筛选帖子并推送到 MeoW",
   "private": true,
   "type": "module",
