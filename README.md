@@ -27,6 +27,7 @@ NodeSeek 上的 VPS 优惠、补货信息转瞬即逝，手动刷新既费时又
 - 失败自动重试：推送失败的消息持久化保留，容器重启后继续补推
 - 去重防打扰：已处理帖子记录在本地状态文件，同一帖绝不重复推送
 - 轻量容器化：Node.js 24 Alpine 镜像，Docker 一条命令启动，零配置目录挂载
+- 版本感知：启动日志显示当前版本号，每次自检自动查询 GitHub 最新 Release，发现新版时在日志和 MeoW 推送中提醒
 
 ## ⚡ 快速开始
 
@@ -137,7 +138,7 @@ docker run -d \
 | `PUSH_CATEGORY` | 条件必填 | - | 版块匹配，设为 `all` 或英文逗号分隔的版块标识如 `trade,daily`，命中指定版块即推送 |
 | `BLOCK_KEYWORDS` | 否 | - | 屏蔽词，英文逗号分隔。命中任意一个即跳过推送，在所有匹配规则中均生效 |
 | `PUSH_EXISTING` | 否 | `false` | 首次启动时是否还对 RSS 中已有的帖子执行匹配和推送 |
-| `HEALTH_CHECK_MINUTES` | 否 | `60` | 定时自检间隔（分钟），范围 0-1440。设为 0 关闭自检。自检时会验证 RSS 与 MeoW 连接并推送一条通知 |
+| `HEALTH_CHECK_MINUTES` | 否 | `60` | 定时自检间隔（分钟），范围 0-1440。设为 0 关闭自检。自检时验证 RSS 与 MeoW 连接、检查 GitHub 最新版本，并通过 MeoW 推送通知 |
 
 > `KEYWORDS`、`KEYWORD_GROUPS`、`REGEX_PATTERNS`、`PUSH_CATEGORY` 四项至少配置一种。
 
@@ -159,6 +160,7 @@ docker logs -f seekmeow
 - 优先级策略：屏蔽词 > 版块过滤 > 关键词 / 组合词 / 正则 / 版块匹配，命中即推送
 - 有序轮询：条目按发布时间升序处理，保证补推顺序与真实发帖顺序一致
 - 优雅退出：收到 `SIGTERM` / `SIGINT` 后等待当前轮次完成再退出，避免状态丢失
+- 更新检测：启动及每次自检时通过 GitHub API 检查最新 Release，发现新版时日志和 MeoW 推送同步提醒
 
 ## 🧱 技术栈
 
