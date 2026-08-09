@@ -58,8 +58,8 @@ services:
       - PUSH_CATEGORY=trade
       - BLOCK_KEYWORDS=求购,已收
       - PUSH_EXISTING=false
-      - HEALTH_CHECK_MINUTES=60
       - SHOW_LINK_URL=false
+      - HEALTH_CHECK_MINUTES=60
 ```
 
 然后启动：
@@ -92,8 +92,8 @@ docker run -d \
   -e PUSH_CATEGORY=trade \
   -e BLOCK_KEYWORDS="求购,已收" \
   -e PUSH_EXISTING=false \
-  -e HEALTH_CHECK_MINUTES=60 \
   -e SHOW_LINK_URL=false \
+  -e HEALTH_CHECK_MINUTES=60 \
   ghcr.io/sunnyhmz7010/seekmeow:latest
 ```
 
@@ -118,8 +118,8 @@ docker run -d \
   -e PUSH_CATEGORY=trade \
   -e BLOCK_KEYWORDS="求购,已收" \
   -e PUSH_EXISTING=false \
-  -e HEALTH_CHECK_MINUTES=60 \
   -e SHOW_LINK_URL=false \
+  -e HEALTH_CHECK_MINUTES=60 \
   seekmeow
 ```
 
