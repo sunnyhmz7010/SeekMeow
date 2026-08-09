@@ -83,7 +83,7 @@ export async function runApp({
   env = process.env,
   logger = createLogger(),
   stateFactory = () => new StateStore('/app/data/state.json', 1000),
-  pusherFactory = (config) => createMeowClient({ nickname: config.meowNickname }),
+  pusherFactory = (config) => createMeowClient({ nickname: config.meowNickname, showLinkUrl: config.showLinkUrl }),
   monitorFactory = (options) => new Monitor(options),
   fetchItems = () => fetchFeed(),
   checkUpdateFn = (logger_, currentVersion, fetchImpl) => checkUpdate(logger_, currentVersion, fetchImpl),

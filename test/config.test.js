@@ -16,6 +16,7 @@ test('配置使用约定默认值', () => {
   assert.equal(config.matchScope, 'all');
   assert.equal(config.categories, null);
   assert.equal(config.pushExisting, false);
+  assert.equal(config.showLinkUrl, false);
   assert.equal(config.healthCheckMs, 3600000);
 });
 
@@ -80,6 +81,13 @@ test('PUSH_CATEGORY 解析与校验', () => {
   assert.deepEqual([...parseConfig({ ...requiredEnv, PUSH_CATEGORY: 'trade,daily' }).pushCategory], ['trade', 'daily']);
   assert.throws(() => parseConfig({ ...requiredEnv, PUSH_CATEGORY: 'unknown' }), /PUSH_CATEGORY/);
   assert.throws(() => parseConfig({ ...requiredEnv, PUSH_CATEGORY: 'trade,unknown' }), /PUSH_CATEGORY/);
+});
+
+test('SHOW_LINK_URL 默认值与校验', () => {
+  assert.equal(parseConfig(requiredEnv).showLinkUrl, false);
+  assert.equal(parseConfig({ ...requiredEnv, SHOW_LINK_URL: 'true' }).showLinkUrl, true);
+  assert.equal(parseConfig({ ...requiredEnv, SHOW_LINK_URL: ' false ' }).showLinkUrl, false);
+  assert.throws(() => parseConfig({ ...requiredEnv, SHOW_LINK_URL: 'yes' }), /SHOW_LINK_URL/);
 });
 
 test('HEALTH_CHECK_MINUTES 默认值、禁用与范围校验', () => {

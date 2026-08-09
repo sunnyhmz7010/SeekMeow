@@ -74,7 +74,8 @@ export function formatMessage(item, match = {}) {
 export function createMeowClient({
   nickname,
   fetchImpl = globalThis.fetch,
-  timeoutMs = 15000
+  timeoutMs = 15000,
+  showLinkUrl = false
 }) {
   const endpoint = `${MEOW_BASE_URL}/${encodeURIComponent(nickname)}/NodeSeek?msgType=text`;
 
@@ -105,9 +106,13 @@ export function createMeowClient({
 
   return {
     async push(item, match) {
+      let msg = formatMessage(item, match);
+      if (showLinkUrl && item.link) {
+        msg += `\n🔗 链接：${item.link}`;
+      }
       await post({
         title: item.title,
-        msg: formatMessage(item, match),
+        msg,
         url: item.link
       });
     },

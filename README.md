@@ -59,6 +59,7 @@ services:
       - BLOCK_KEYWORDS=求购,已收
       - PUSH_EXISTING=false
       - HEALTH_CHECK_MINUTES=60
+      - SHOW_LINK_URL=false
 ```
 
 然后启动：
@@ -138,6 +139,7 @@ docker run -d \
 | `PUSH_CATEGORY` | 条件必填 | - | 版块匹配，设为 `all` 或英文逗号分隔的版块标识如 `trade,daily`，命中指定版块即推送 |
 | `BLOCK_KEYWORDS` | 否 | - | 屏蔽词，英文逗号分隔。命中任意一个即跳过推送，在所有匹配规则中均生效 |
 | `PUSH_EXISTING` | 否 | `false` | 首次启动时是否还对 RSS 中已有的帖子执行匹配和推送 |
+| `SHOW_LINK_URL` | 否 | `false` | 是否在推送内容底部显示帖子链接便于复制 |
 | `HEALTH_CHECK_MINUTES` | 否 | `60` | 定时自检间隔（分钟），范围 0-1440。设为 0 关闭自检。自检时验证 RSS 与 MeoW 连接、检查 GitHub 最新版本，并通过 MeoW 推送通知 |
 
 > `KEYWORDS`、`KEYWORD_GROUPS`、`REGEX_PATTERNS`、`PUSH_CATEGORY` 四项至少配置一种。

@@ -70,6 +70,7 @@ src/state.js     ← 状态持久化（原子写入、限长裁剪）
 | `PUSH_CATEGORY` | 条件必填 | - | 版块匹配（`all` 或逗号分隔版块标识） |
 | `BLOCK_KEYWORDS` | 否 | - | 屏蔽词（逗号分隔），所有规则均生效 |
 | `PUSH_EXISTING` | 否 | `false` | 首次启动是否推送已有帖子 |
+| `SHOW_LINK_URL` | 否 | `false` | 是否在推送内容底部显示帖子链接便于复制 |
 | `HEALTH_CHECK_MINUTES` | 否 | `60` | 定时自检间隔（分钟），0 关闭。自检时验证 RSS/MeoW 连接并检查版本更新 |
 
 条件必填项（`KEYWORDS` / `KEYWORD_GROUPS` / `REGEX_PATTERNS` / `PUSH_CATEGORY`）至少配置一种。

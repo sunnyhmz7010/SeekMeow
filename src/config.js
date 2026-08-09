@@ -140,6 +140,7 @@ export function parseConfig(env = process.env) {
     pushCategory,
     blockedKeywords,
     pushExisting: parseBoolean(env.PUSH_EXISTING, 'PUSH_EXISTING', false),
+    showLinkUrl: parseBoolean(env.SHOW_LINK_URL, 'SHOW_LINK_URL', false),
     healthCheckMs
   };
 }
