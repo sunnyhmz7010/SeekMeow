@@ -116,7 +116,7 @@ export function createMeowClient({
         url: item.link
       });
     },
-    async pushHealthCheck({ rssOk = true, version = '', updateInfo = null } = {}) {
+    async pushHealthCheck({ rssOk = true, version = '', updateInfo = null, configSummary = '' } = {}) {
       const lines = [];
       if (rssOk) {
         lines.push('SeekMeow 已启动，RSS 与 MeoW 连接正常。');
@@ -129,9 +129,19 @@ export function createMeowClient({
           : `当前已是最新版本：v${version}`;
         lines.push(updateLine);
       }
+      if (configSummary) {
+        lines.push(`⚙️ 启动配置：${configSummary}`);
+      }
       await post({
-        title: 'SeekMeow 自检',
+        title: configSummary ? 'SeekMeow 启动' : 'SeekMeow 自检',
         msg: lines.join('\n'),
+        url: NODESEEK_HOME_URL
+      });
+    },
+    async pushConfig(summary) {
+      await post({
+        title: 'SeekMeow 启动配置',
+        msg: summary,
         url: NODESEEK_HOME_URL
       });
     },

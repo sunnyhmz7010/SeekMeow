@@ -3,7 +3,7 @@ import test from 'node:test';
 
 import { describeConfig, runApp } from '../src/index.js';
 
-test('启动配置摘要包含版本、昵称、轮询间隔、匹配范围、版块、规则详情和自检间隔', () => {
+test('启动配置摘要包含所有配置项', () => {
   assert.equal(describeConfig({
     meowNickname: 'tester',
     checkIntervalMs: 5000,
@@ -14,20 +14,23 @@ test('启动配置摘要包含版本、昵称、轮询间隔、匹配范围、�
     regexPatterns: [/年付/iu],
     pushCategory: new Set(['trade']),
     blockedKeywords: ['求购'],
-    categories: new Set(['trade', 'daily'])
-  }), '版本 v1.9.0，MeoW 昵称 tester，轮询间隔 5 秒，匹配范围 all，监控版块 trade,daily，规则 4 条（关键词：VPS,优惠 | 组合词：香港+VPS | 正则：年付 | 版块匹配：trade），屏蔽词：求购，版块过滤：trade,daily，自检间隔 60 分钟');
+    categories: new Set(['trade', 'daily']),
+    pushExisting: false,
+    showLinkUrl: false
+  }), '版本 v2.0.0，MeoW 昵称 tester，轮询间隔 5 秒，匹配范围 all，监控版块 trade,daily，规则 4 条（关键词：VPS,优惠 | 组合词：香港+VPS | 正则：年付 | 版块匹配：trade），屏蔽词：求购，版块过滤：trade,daily，首次推送已有 否，显示链接 否，自检间隔 60 分钟');
 });
 
-test('启动时自检 RSS 连接并推送自检通知', async () => {
+test('启动时推送启动信息到 MeoW', async () => {
   const logs = [];
   const events = [];
+  let startupOptions;
   const state = { async load() { events.push('state'); return true; } };
   const monitor = {
     async initialize() { events.push('monitor'); },
     async run() { events.push('run'); }
   };
   const pusher = {
-    async pushHealthCheck() { events.push('health-check'); }
+    async pushHealthCheck(options) { startupOptions = options; events.push('startup'); }
   };
 
   await runApp({
@@ -39,7 +42,7 @@ test('启动时自检 RSS 连接并推送自检通知', async () => {
     monitorFactory: () => monitor,
     pusherFactory: () => pusher,
     fetchItems: async () => [],
-    checkUpdateFn: async (logger) => { logger.info('当前已是最新版本 v1.9.0'); return null; },
+    checkUpdateFn: async (logger) => { logger.info('当前已是最新版本 v2.0.0'); return null; },
     registerSignals: false,
     logger: {
       info(message) { logs.push(message); },
@@ -48,15 +51,20 @@ test('启动时自检 RSS 连接并推送自检通知', async () => {
     }
   });
 
-  assert.deepEqual(events, ['health-check', 'monitor', 'run']);
-  assert.equal(logs[0], '启动配置：版本 v1.9.0，MeoW 昵称 tester，轮询间隔 5 秒，匹配范围 all，监控版块 all，规则 1 条（关键词：VPS），自检间隔 60 分钟');
+  assert.deepEqual(events, ['startup', 'monitor', 'run']);
+  assert.equal(startupOptions.rssOk, true);
+  assert.equal(startupOptions.version, '2.0.0');
+  assert.equal(startupOptions.updateInfo, null);
+  assert.ok(startupOptions.configSummary.includes('版本 v2.0.0'));
+  assert.ok(startupOptions.configSummary.includes('MeoW 昵称 tester'));
+  assert.equal(logs[0], '启动配置：版本 v2.0.0，MeoW 昵称 tester，轮询间隔 5 秒，匹配范围 all，监控版块 all，规则 1 条（关键词：VPS），首次推送已有 否，显示链接 否，自检间隔 60 分钟');
   assert.equal(logs[1], '自检 RSS 连接正常');
-  assert.equal(logs[2], '当前已是最新版本 v1.9.0');
-  assert.equal(logs[3], '自检 MeoW 推送正常');
+  assert.equal(logs[2], '当前已是最新版本 v2.0.0');
+  assert.equal(logs[3], '启动信息已推送至 MeoW');
   assert.equal(logs[4], '监控已启动');
 });
 
-test('启动自检 RSS 失败时推送降级自检通知', async () => {
+test('RSS 失败时仍推送启动信息', async () => {
   const events = [];
   const state = { async load() { return true; } };
   const monitor = {
@@ -76,7 +84,7 @@ test('启动自检 RSS 失败时推送降级自检通知', async () => {
     monitorFactory: () => monitor,
     pusherFactory: () => pusher,
     fetchItems: async () => { throw new Error('rss down'); },
-    checkUpdateFn: async (logger) => { logger.info('当前已是最新版本 v1.9.0'); return null; },
+    checkUpdateFn: async (logger) => { logger.info('当前已是最新版本 v2.0.0'); return null; },
     registerSignals: false,
     logger: {
       info() {},
@@ -85,10 +93,13 @@ test('启动自检 RSS 失败时推送降级自检通知', async () => {
     }
   });
 
-  assert.deepEqual(events, [{ rssOk: false, version: '1.9.0', updateInfo: null }]);
+  assert.equal(events.length, 1);
+  assert.equal(events[0].rssOk, false);
+  assert.ok(events[0].configSummary.includes('版本 v2.0.0'));
+  assert.ok(events[0].configSummary.includes('MeoW 昵称 tester'));
 });
 
-test('启动自检 MeoW 推送失败时拒绝启动', async () => {
+test('启动时 MeoW 推送失败则拒绝启动', async () => {
   const monitor = {
     async initialize() { throw new Error('monitor should not start'); },
     async run() {}
@@ -105,7 +116,7 @@ test('启动自检 MeoW 推送失败时拒绝启动', async () => {
     monitorFactory: () => monitor,
     pusherFactory: () => pusher,
     fetchItems: async () => [],
-    checkUpdateFn: async (logger) => { logger.info('当前已是最新版本 v1.9.0'); return null; },
+    checkUpdateFn: async (logger) => { logger.info('当前已是最新版本 v2.0.0'); return null; },
     registerSignals: false,
     logger: {
       info() {},

@@ -75,6 +75,8 @@ export function describeConfig(config) {
   ];
   if (config.blockedKeywords.length) parts.push(`屏蔽词：${config.blockedKeywords.join(',')}`);
   if (config.categories) parts.push(`版块过滤：${[...config.categories].join(',')}`);
+  parts.push(`首次推送已有 ${config.pushExisting ? '是' : '否'}`);
+  parts.push(`显示链接 ${config.showLinkUrl ? '是' : '否'}`);
   if (config.healthCheckMs) parts.push(`自检间隔 ${config.healthCheckMs / 60000} 分钟`);
   return parts.join('，');
 }
@@ -106,19 +108,17 @@ export async function runApp({
   const updateInfo = await checkUpdateFn(logger, VERSION);
 
   try {
-    await pusher.pushHealthCheck({ rssOk: startupRssOk, version: VERSION, updateInfo });
-    logger.info('自检 MeoW 推送正常');
+    await pusher.pushHealthCheck({ rssOk: startupRssOk, version: VERSION, updateInfo, configSummary: describeConfig(config) });
+    logger.info('启动信息已推送至 MeoW');
   } catch (error) {
-    logger.error(`自检 MeoW 推送失败，${error.message}`);
+    logger.error(`MeoW 推送失败，${error.message}`);
     throw error;
   }
 
   const controller = new AbortController();
   let healthCheckTimer;
   if (config.healthCheckMs) {
-    const startupTime = Date.now();
     healthCheckTimer = setInterval(async () => {
-      if (Date.now() - startupTime < 60000) return;
       let rssOk = true;
       try {
         await fetchItems();
