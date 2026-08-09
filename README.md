@@ -93,6 +93,7 @@ docker run -d \
   -e BLOCK_KEYWORDS="求购,已收" \
   -e PUSH_EXISTING=false \
   -e HEALTH_CHECK_MINUTES=60 \
+  -e SHOW_LINK_URL=false \
   ghcr.io/sunnyhmz7010/seekmeow:latest
 ```
 
@@ -118,6 +119,7 @@ docker run -d \
   -e BLOCK_KEYWORDS="求购,已收" \
   -e PUSH_EXISTING=false \
   -e HEALTH_CHECK_MINUTES=60 \
+  -e SHOW_LINK_URL=false \
   seekmeow
 ```
 
