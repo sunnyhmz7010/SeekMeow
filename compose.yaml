@@ -9,9 +9,9 @@ services:
       - CATEGORIES=all
       - MATCH_SCOPE=all
       - KEYWORDS=VPS,优惠,补货
-      - KEYWORD_GROUPS=[["香港","VPS"],["日本","线路"]]
-      - REGEX_PATTERNS=["年付\\s*\\d+","香港|日本"]
+      - KEYWORD_GROUPS=[]
+      - REGEX_PATTERNS=[]
       - PUSH_CATEGORY=trade
       - BLOCK_KEYWORDS=求购,已收
       - PUSH_EXISTING=false
-      - HEALTH_CHECK_MINUTES=60
+      - HEALTH_CHECK_MINUTES=1440

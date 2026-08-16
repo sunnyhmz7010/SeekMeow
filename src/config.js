@@ -120,7 +120,7 @@ export function parseConfig(env = process.env) {
     throw new Error('CATEGORIES 包含不支持的版块 slug');
   }
 
-  const healthCheckMinutes = Number(env.HEALTH_CHECK_MINUTES ?? '60');
+  const healthCheckMinutes = Number(env.HEALTH_CHECK_MINUTES ?? '1440');
   let healthCheckMs = null;
   if (!Number.isSafeInteger(healthCheckMinutes) || healthCheckMinutes < 0 || healthCheckMinutes > 1440) {
     throw new Error('HEALTH_CHECK_MINUTES 必须是 0 到 1440 之间的整数');

@@ -57,7 +57,7 @@ test('启动时推送启动信息到 MeoW', async () => {
   assert.equal(startupOptions.updateInfo, null);
   assert.ok(startupOptions.configSummary.includes('版本 v2.0.0'));
   assert.ok(startupOptions.configSummary.includes('MeoW 昵称 tester'));
-  assert.equal(logs[0], '启动配置：版本 v2.0.0，MeoW 昵称 tester，轮询间隔 5 秒，匹配范围 all，监控版块 all，规则 1 条（关键词：VPS），首次推送已有 否，显示链接 否，自检间隔 60 分钟');
+  assert.equal(logs[0], '启动配置：版本 v2.0.0，MeoW 昵称 tester，轮询间隔 5 秒，匹配范围 all，监控版块 all，规则 1 条（关键词：VPS），首次推送已有 否，显示链接 否，自检间隔 1440 分钟');
   assert.equal(logs[1], '自检 RSS 连接正常');
   assert.equal(logs[2], '当前已是最新版本 v2.0.0');
   assert.equal(logs[3], '启动信息已推送至 MeoW');

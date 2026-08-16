@@ -17,7 +17,7 @@ test('配置使用约定默认值', () => {
   assert.equal(config.categories, null);
   assert.equal(config.pushExisting, false);
   assert.equal(config.showLinkUrl, false);
-  assert.equal(config.healthCheckMs, 3600000);
+  assert.equal(config.healthCheckMs, 86400000);
 });
 
 test('解析普通词、组合词、屏蔽词、正则和多版块', () => {
@@ -91,7 +91,7 @@ test('SHOW_LINK_URL 默认值与校验', () => {
 });
 
 test('HEALTH_CHECK_MINUTES 默认值、禁用与范围校验', () => {
-  assert.equal(parseConfig(requiredEnv).healthCheckMs, 3600000);
+  assert.equal(parseConfig(requiredEnv).healthCheckMs, 86400000);
   assert.equal(parseConfig({ ...requiredEnv, HEALTH_CHECK_MINUTES: '0' }).healthCheckMs, null);
   assert.equal(parseConfig({ ...requiredEnv, HEALTH_CHECK_MINUTES: '10' }).healthCheckMs, 600000);
   assert.throws(() => parseConfig({ ...requiredEnv, HEALTH_CHECK_MINUTES: '1441' }), /HEALTH_CHECK_MINUTES/);
