@@ -33,7 +33,7 @@ NodeSeek 上的 VPS 优惠、补货信息转瞬即逝，手动刷新既费时又
 
 ### 📋 前置要求
 
-- 一台能访问外网的 VPS 或 NAS（需能连接 `rss.nodeseek.com` 和 `api.chuckfang.com`，无需开放入站端口）
+- 一台能访问外网的 VPS 或 NAS（需能连接 `rss.nodeseek.com` 和 `api.chuckfang.com`）
 - Docker（18.09+）
 - 一个 MeoW 昵称（`https://api.chuckfang.com/{你的昵称}/NodeSeek`）
 
