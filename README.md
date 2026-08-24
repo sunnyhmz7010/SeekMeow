@@ -147,7 +147,16 @@ docker run -d \
 > `KEYWORDS`、`KEYWORD_GROUPS`、`REGEX_PATTERNS`、`PUSH_CATEGORY` 四项至少配置一种。
 
 可选版块标识：
-`daily` `tech` `info` `review` `trade` `carpool` `promo` `life` `dev` `photo-share` `expose` `inner` `sandbox`
+
+| 标识 | 版块 | 标识 | 版块 |
+| --- | --- | --- | --- |
+| `daily` | 日常 | `life` | 生活 |
+| `tech` | 技术 | `dev` | Dev |
+| `info` | 情报 | `photo-share` | 贴图 |
+| `review` | 测评 | `expose` | 曝光 |
+| `trade` | 交易 | `inner` | 内版 |
+| `carpool` | 拼车 | `sandbox` | 沙盒 |
+| `promo` | 推广 | | |
 
 ### 📜 日志与去重
 
