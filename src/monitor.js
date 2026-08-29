@@ -1,5 +1,4 @@
 import { setTimeout as delay } from 'node:timers/promises';
-import { formatReason } from './meow.js';
 
 function chronological(items) {
   return items
@@ -10,6 +9,11 @@ function chronological(items) {
     }))
     .sort((left, right) => left.time === right.time ? left.index - right.index : left.time - right.time)
     .map(({ item }) => item);
+}
+
+function isSensitiveWordError(error) {
+  const message = error?.message ?? String(error);
+  return /\b403\b/.test(message) && message.includes('敏感词');
 }
 
 export class Monitor {
@@ -57,15 +61,23 @@ export class Monitor {
         continue;
       }
 
-      this.logger.info(`命中帖子 ${item.id}，命中规则：${formatReason(result.reason)}`);
+      this.logger.info(`命中帖子：${item.link}`);
       try {
         await this.pusher.push(item, result);
         const removed = this.state.removePending(item.id);
         changed = this.state.add(item.id) || removed || changed;
-        this.logger.info(`推送成功 ${item.id}`);
+        this.logger.info(`推送成功 ${item.link}`);
       } catch (error) {
-        changed = this.state.addPending(item) || changed;
-        this.logger.error(`推送失败 ${item.id}，${error.message}`);
+        if (isSensitiveWordError(error)) {
+          const removed = this.state.removePending(item.id);
+          changed = this.state.add(item.id) || removed || changed;
+          const message = `推送丢弃 ${item.link}，${error.message}`;
+          if (typeof this.logger.warn === 'function') this.logger.warn(message);
+          else this.logger.info(message);
+        } else {
+          changed = this.state.addPending(item) || changed;
+          this.logger.error(`推送失败 ${item.link}，${error.message}`);
+        }
       }
     }
 
@@ -74,11 +86,11 @@ export class Monitor {
   }
 
   async run(signal) {
-    let lastRssError = false;
+    let consecutiveRssErrors = 0;
     while (!signal.aborted) {
       try {
         await this.poll();
-        if (lastRssError) {
+        if (consecutiveRssErrors >= 2) {
           this.logger.info('RSS 连接已恢复');
           try {
             await this.pusher.pushRecovery();
@@ -86,18 +98,18 @@ export class Monitor {
           } catch (pushError) {
             this.logger.error(`RSS 恢复通知推送失败，${pushError.message}`);
           }
-          lastRssError = false;
         }
+        consecutiveRssErrors = 0;
       } catch (error) {
         this.logger.error(error.message);
-        if (!lastRssError) {
+        consecutiveRssErrors += 1;
+        if (consecutiveRssErrors === 2) {
           try {
             await this.pusher.pushError(error.message);
             this.logger.info('RSS 异常通知推送成功');
           } catch (pushError) {
             this.logger.error(`RSS 异常通知推送失败，${pushError.message}`);
           }
-          lastRssError = true;
         }
       }
       try {
