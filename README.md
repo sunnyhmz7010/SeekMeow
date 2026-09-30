@@ -194,7 +194,7 @@ SeekMeow/
 │   ├── monitor.js          # 轮询调度、去重与失败重试
 │   └── state.js            # 状态持久化存储（原子写入）
 ├── test/                   # 单元测试（node --test）
-├── .github/ISSUE_TEMPLATE/ # Issue 模板
+├── .github                 # GitHub Actions 与 Issue 模板
 ├── Dockerfile              # 容器镜像定义
 ├── .env.example            # 环境变量示例
 └── package.json            # 依赖与脚本
